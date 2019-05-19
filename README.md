@@ -1,2 +1,3 @@
-# steranko
-Security and Identity Management for Go
+# Steranko 🔐
+
+## Security and Identity Management for Go
