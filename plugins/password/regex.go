@@ -29,7 +29,7 @@ func CountSymbols(value string) int {
 	return count(value, symbolRegex)
 }
 
-// count uses a regular expression to count the number of occurrances of a
+// count uses a regular expression to count the number of occurrences of a
 // character in the provided string.
 func count(value string, re *regexp.Regexp) int {
 

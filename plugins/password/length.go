@@ -11,7 +11,7 @@ func (minLength MinLength) PasswordRuleDescription(language string) string {
 	return fmt.Sprintf("Must be at least %d characters long", minLength)
 }
 
-// ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaing the problem.
+// ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaining the problem.
 func (minLength MinLength) ValidatePassword(password string, language string) (OK bool, message string) {
 
 	if len(password) >= int(minLength) {

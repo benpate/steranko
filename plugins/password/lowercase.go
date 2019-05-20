@@ -13,7 +13,7 @@ func (rule MinLowercase) PasswordRuleDescription(language string) string {
 	return fmt.Sprint("Must be at least %i characters long.")
 }
 
-// ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaing the problem.
+// ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaining the problem.
 func (rule MinLowercase) ValidatePassword(password string, language string) (OK bool, message string) {
 
 	if CountLowercase(password) >= int(rule) {

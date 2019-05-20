@@ -18,7 +18,7 @@ func (api *API) PasswordRuleDescription(language string) string {
 	return "Password can not appear on previously breached websites.  Visit https://haveibeenpwned.com for more info."
 }
 
-// ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaing the problem.
+// ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaining the problem.
 func (api *API) ValidatePassword(password string, language string) (OK bool, message string) {
 
 	// Use SHA1 and Base64 encoding to hash the password.
