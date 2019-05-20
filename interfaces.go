@@ -16,6 +16,9 @@ type Context interface {
 	// Path returns the registered path for the handler.
 	Path() string
 
+	// Language returns the default language used by the browser.
+	Language() string
+
 	// RealIP returns the client's network address based on `X-Forwarded-For`
 	// or `X-Real-IP` request header.
 	RealIP() string

@@ -1,6 +1,9 @@
 package steranko
 
-import "github.com/benpate/derp"
+import (
+	"github.com/benpate/data"
+	"github.com/benpate/derp"
+)
 
 // UserService wraps all of the functions that must be provided to Steranko by your application.
 // This API matches the presto.Service API very closely, so it should be possible to wrap an
@@ -8,16 +11,16 @@ import "github.com/benpate/derp"
 type UserService interface {
 
 	// New creates a newly initialized User that is ready to use
-	New() User
+	New() *User
 
 	// Load retrieves a single User from the database
-	Load(username string) (User, *derp.Error)
+	Load(username string) (*User, *derp.Error)
 
 	// Save inserts/updates a single User in the database
-	Save(object User, comment string) *derp.Error
+	Save(object *User, comment string) *derp.Error
 
 	// Delete removes a single User from the database
-	Delete(object User, comment string) *derp.Error
+	Delete(object *User, comment string) *derp.Error
 
 	// Close cleans up any connections opened by the service.
 	Close()
@@ -27,4 +30,10 @@ type UserService interface {
 type User struct {
 	Username string
 	Password string
+	data.Journal
+}
+
+// ID returns the primary ID of this User record.  It is required so that `User` will work as a data.Object
+func (user User) ID() string {
+	return user.Username
 }

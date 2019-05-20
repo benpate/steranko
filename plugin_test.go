@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"context"
 	"testing"
 
 	"github.com/benpate/data/memory"
@@ -11,7 +12,9 @@ func TestPlugins(t *testing.T) {
 
 	ds := memory.New()
 
-	s := New(ds)
+	service := &testUserService{session: ds.Session(context.TODO())}
+
+	s := New(service)
 
 	assert.Empty(t, s.Plugins)
 
