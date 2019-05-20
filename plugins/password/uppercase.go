@@ -7,6 +7,11 @@ import (
 // MinUppercase is a Plugin that validates the minimum length of passwords
 type MinUppercase int
 
+// Name returns the name of this plugin, and is required for this object to implement the "Plugin" interface
+func (rule MinUppercase) Name() string {
+	return "MinUppercase"
+}
+
 // PasswordRuleDescription returns a localized, human-friendly description of the password rule.
 func (rule MinUppercase) PasswordRuleDescription(language string) string {
 

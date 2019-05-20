@@ -7,6 +7,11 @@ import (
 // MinDigits is a Plugin that validates the minimum length of passwords
 type MinDigits int
 
+// Name returns the name of this plugin, and is required for this object to implement the "Plugin" interface
+func (rule MinDigits) Name() string {
+	return "MinDigits"
+}
+
 // PasswordRuleDescription returns a localized, human-friendly description of the password rule.
 func (rule MinDigits) PasswordRuleDescription(language string) string {
 

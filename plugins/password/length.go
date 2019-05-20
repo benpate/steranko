@@ -5,6 +5,11 @@ import "fmt"
 // MinLength is a Plugin that validates the minimum length of passwords
 type MinLength int
 
+// Name returns the name of this plugin, and is required for this object to implement the "Plugin" interface
+func (rule MinLength) Name() string {
+	return "MinLength"
+}
+
 // PasswordRuleDescription returns a localized, human-friendly description of the password rule.
 func (minLength MinLength) PasswordRuleDescription(language string) string {
 
