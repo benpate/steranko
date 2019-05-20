@@ -1,23 +1,30 @@
 package steranko
 
-// User represents a single record (stored in the data.Datastore) that will allow
-// access to this system
+import "github.com/benpate/derp"
+
+// UserService wraps all of the functions that must be provided to Steranko by your application.
+// This API matches the presto.Service API very closely, so it should be possible to wrap an
+// existing presto service to serve Steranko, too.
+type UserService interface {
+
+	// New creates a newly initialized User that is ready to use
+	New() User
+
+	// Load retrieves a single User from the database
+	Load(username string) (User, *derp.Error)
+
+	// Save inserts/updates a single User in the database
+	Save(object User, comment string) *derp.Error
+
+	// Delete removes a single User from the database
+	Delete(object User, comment string) *derp.Error
+
+	// Close cleans up any connections opened by the service.
+	Close()
+}
+
+// User defines all of the data required for Steranko to authenticate and authorize a person in the system.
 type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-
-// IsValid returns TRUE if the provided plaintext password matches
-// the hashed value in this record.  The `reset` return value is TRUE
-// if the password strength has been updated, and the record should be
-// re-saved to the database.
-func (user *User) IsValid(password string) (OK bool, reset bool) {
-
-	return false, false
-}
-
-// IsPwned returns TRUE
-func IsPwned(password string) bool {
-	return false
+	Username string
+	Password string
 }
