@@ -11,17 +11,17 @@ func (rule MinLength) Name() string {
 }
 
 // PasswordRuleDescription returns a localized, human-friendly description of the password rule.
-func (minLength MinLength) PasswordRuleDescription(language string) string {
+func (rule MinLength) PasswordRuleDescription(language string) string {
 
-	return fmt.Sprintf("Must be at least %d characters long", minLength)
+	return fmt.Sprintf("Must be at least %d characters long", rule)
 }
 
 // ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaining the problem.
-func (minLength MinLength) ValidatePassword(password string, language string) (OK bool, message string) {
+func (rule MinLength) ValidatePassword(password string, language string) (OK bool, message string) {
 
-	if len(password) >= int(minLength) {
+	if len(password) >= int(rule) {
 		return true, ""
 	}
 
-	return false, fmt.Sprintf("Password must be at least %d characters long", minLength)
+	return false, fmt.Sprintf("Password must be at least %d characters long", rule)
 }
