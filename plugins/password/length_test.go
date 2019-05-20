@@ -2,6 +2,7 @@ package password
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,7 +51,7 @@ func TestLength(t *testing.T) {
 		testValue := ""
 
 		// 20 Char Password
-		for x := 1 ; x < 30 ; x=x+1 {
+		for x := 1; x < 30; x = x + 1 {
 			testValue = testValue + "a"
 
 			ok, message := plugin20.ValidatePassword(testValue, "en")

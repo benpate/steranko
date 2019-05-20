@@ -2,19 +2,20 @@ package password
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCountDigits(t *testing.T) {
 
-		assert.Equal(t, 0, CountDigits("hello-there"))
-		assert.Equal(t, 1, CountDigits("1hello-there"))
-		assert.Equal(t, 2, CountDigits("1hello-there2"))
-		assert.Equal(t, 3, CountDigits("1hello-2there3"))
-		assert.Equal(t, 4, CountDigits("1Hello-2There34"))
-		assert.Equal(t, 9, CountDigits("123456789"))
-		assert.Equal(t, 10, CountDigits("1234567890"))
-		assert.Equal(t, 20, CountDigits("12345678901234567890"))
+	assert.Equal(t, 0, CountDigits("hello-there"))
+	assert.Equal(t, 1, CountDigits("1hello-there"))
+	assert.Equal(t, 2, CountDigits("1hello-there2"))
+	assert.Equal(t, 3, CountDigits("1hello-2there3"))
+	assert.Equal(t, 4, CountDigits("1Hello-2There34"))
+	assert.Equal(t, 9, CountDigits("123456789"))
+	assert.Equal(t, 10, CountDigits("1234567890"))
+	assert.Equal(t, 20, CountDigits("12345678901234567890"))
 }
 
 func TestCountLowercase(t *testing.T) {
@@ -59,5 +60,5 @@ func TestCountSymbol(t *testing.T) {
 	assert.Equal(t, 1, CountSymbols(`"`))
 	assert.Equal(t, 2, CountSymbols("!@"))
 	assert.Equal(t, 3, CountSymbols(")(*"))
-	assert.Equal(t, 32, CountSymbols("`~!@#$%^&*()_-+={[}]|:;'<,>.?/)" + `"`))
+	assert.Equal(t, 32, CountSymbols("`~!@#$%^&*()_-+={[}]|:;'<,>.?/)"+`"`))
 }

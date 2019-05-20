@@ -2,8 +2,9 @@ package steranko
 
 import (
 	"testing"
-	"github.com/stretchr/testify/assert"
+
 	"github.com/benpate/data/memory"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPlugins(t *testing.T) {

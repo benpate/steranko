@@ -1,7 +1,7 @@
 package password
 
 import (
-	 "fmt"
+	"fmt"
 )
 
 // MinUppercase is a Plugin that validates the minimum length of passwords

@@ -17,7 +17,7 @@ type Context interface {
 	Path() string
 
 	// RealIP returns the client's network address based on `X-Forwarded-For`
-    // or `X-Real-IP` request header.
+	// or `X-Real-IP` request header.
 	RealIP() string
 
 	// ParamNames returns a slice of route parameter names that are present in the request path
@@ -33,7 +33,7 @@ type Context interface {
 	FormParams() (url.Values, error)
 
 	// Bind binds the request body into provided type `i`. The default binder
-    // does it based on Content-Type header.
+	// does it based on Content-Type header.
 	Bind(interface{}) error
 
 	// JSON sends a JSON response with status code.

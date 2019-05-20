@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-
 // MinDigits is a Plugin that validates the minimum length of passwords
 type MinDigits int
 

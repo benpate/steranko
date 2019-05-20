@@ -1,16 +1,17 @@
 package haveibeenpwned
 
 import (
-	"github.com/benpate/remote"
 	"bufio"
 	"bytes"
-	"strings"
 	"crypto/sha1"
 	"encoding/base64"
+	"strings"
+
+	"github.com/benpate/remote"
 )
 
 // API represents the HaveIBeenPwned.com api, and manages all remote calls to this API to check for passwords that have appeared in previous data breaches.
-type API struct {}
+type API struct{}
 
 // PasswordRuleDescription returns a localized, human-friendly description of the password rule.
 func (api *API) PasswordRuleDescription(language string) string {
@@ -32,7 +33,7 @@ func (api *API) ValidatePassword(password string, language string) (OK bool, mes
 	// Send the request to the remote API.  If this breaks, then we'll just get no breach reports and will return 'success'.
 	var response bytes.Buffer
 
-	remote.Get("https://api.pwnedpasswords.com/range" + prefix).Response(&response, nil).Send()
+	remote.Get("https://api.pwnedpasswords.com/range"+prefix).Response(&response, nil).Send()
 	// TODO: we're swallowing errors (for now)
 
 	scanner := bufio.NewScanner(&response)

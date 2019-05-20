@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-
 // MinLowercase is a Plugin that validates the minimum length of passwords
 type MinLowercase int
 

@@ -1,12 +1,11 @@
 package steranko
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 )
 
 // Handler Functions for creating new accounts.
-
 
 // HandleAddSignupData implements the http.HandlerFunc signature, and is
 // used to add browser interaction data to the signup process.  This data

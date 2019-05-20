@@ -1,6 +1,8 @@
 package password
 
-import ("regexp")
+import (
+	"regexp"
+)
 
 var digitsRegex = regexp.MustCompile("[0123456789]")
 var uppercaseRegex = regexp.MustCompile("[ABCDEFGHIJKLMNOPQRSTUVWXYZ]")

@@ -25,8 +25,6 @@ func (s *Steranko) GetPasswordRules(ctx Context) {
 // be wired in to your REST API to allow users to sign in to their accounts.
 func (s *Steranko) PostSigninForm(ctx Context) {
 
-
-
 }
 
 // PostForgotPassword implements the http.HandlerFunc signature, and should
