@@ -1,4 +1,4 @@
-package password
+package rule
 
 // MinComplexity is a plugin that calculates the possible combinations of passwords, and validates against a minimum threshold.
 type MinComplexity int64
