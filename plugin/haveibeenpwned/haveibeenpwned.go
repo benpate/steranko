@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/sha1"
-	"encoding/base64"
+	"encoding/hex"
 	"strings"
 
 	"github.com/benpate/remote"
@@ -22,19 +22,27 @@ func (api *API) PasswordRuleDescription(language string) string {
 func (api *API) ValidatePassword(password string, language string) (OK bool, message string) {
 
 	// Use SHA1 and Base64 encoding to hash the password.
-	h := sha1.New()
-	hashedBytes := h.Sum([]byte(password))
-	encoded := base64.StdEncoding.EncodeToString(hashedBytes)
+	hashedBytes := sha1.Sum([]byte(password))
+	encoded := hex.EncodeToString(hashedBytes[:])
+	encoded = strings.ToUpper(encoded)
 
 	// Split the encoded value into prefix and suffix
 	prefix := encoded[:5]
-	suffix := encoded[6:]
+	suffix := encoded[5:]
 
 	// Send the request to the remote API.  If this breaks, then we'll just get no breach reports and will return 'success'.
 	var response bytes.Buffer
 
-	remote.Get("https://api.pwnedpasswords.com/range"+prefix).Response(&response, nil).Send()
-	// TODO: we're swallowing errors (for now)
+	transaction := remote.Get("https://api.pwnedpasswords.com/range/"+prefix).
+		Response(&response, nil)
+
+	if err := transaction.Send(); err != nil {
+
+		// Error connecting to the remote service.
+		// Swallow this for now, because we don't have a better way
+		// of reporting the error..
+		return true, ""
+	}
 
 	scanner := bufio.NewScanner(&response)
 
