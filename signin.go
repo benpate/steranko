@@ -51,7 +51,7 @@ func (s *Steranko) PostSigninTransaction(ctx Context) error {
 
 	// Fall through means that we have a matching user account.  Now, check the password
 
-	ok, update := s.PasswordHasher.CompareHashedPassword(txn.Password, user.Password)
+	ok, update := s.PasswordHasher.CompareHashedPassword(txn.Password, user.GetPassword())
 
 	if ok == false {
 		return derp.New(CodeForbidden, "steranko.PostSigninTransaction", "Password does not match", txn.Username)
@@ -59,8 +59,8 @@ func (s *Steranko) PostSigninTransaction(ctx Context) error {
 
 	if update == true {
 
-		if password, err := s.PasswordHasher.HashPassword(txn.Password); err == nil {
-			user.Password = password
+		if hashedValue, err := s.PasswordHasher.HashPassword(txn.Password); err == nil {
+			user.SetPassword(hashedValue)
 			s.UserService.Save(user, "Password automatically upgraded by Steranko")
 		}
 	}

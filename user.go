@@ -1,7 +1,6 @@
 package steranko
 
 import (
-	"github.com/benpate/data"
 	"github.com/benpate/derp"
 )
 
@@ -11,29 +10,28 @@ import (
 type UserService interface {
 
 	// New creates a newly initialized User that is ready to use
-	New() *User
+	New() User
 
 	// Load retrieves a single User from the database
-	Load(username string) (*User, *derp.Error)
+	Load(username string) (User, *derp.Error)
 
 	// Save inserts/updates a single User in the database
-	Save(object *User, comment string) *derp.Error
+	Save(user User, comment string) *derp.Error
 
 	// Delete removes a single User from the database
-	Delete(object *User, comment string) *derp.Error
+	Delete(user User, comment string) *derp.Error
 
 	// Close cleans up any connections opened by the service.
 	Close()
 }
 
-// User defines all of the data required for Steranko to authenticate and authorize a person in the system.
-type User struct {
-	Username string
-	Password string
-	data.Journal
-}
+// User interface wraps all of the functions that Steranko needs to authorize a user of the system.
+// This is done so that Steranko can be retrofitted on to your existing data objects.  Just implement
+// this interface, and a CRUD service, and you're all set.
+type User interface {
+	GetUsername() string // Returns the username of the User
+	GetPassword() string // Returns the password of the User
 
-// ID returns the primary ID of this User record.  It is required so that `User` will work as a data.Object
-func (user User) ID() string {
-	return user.Username
+	SetUsername(username string)   // Sets the username of the User
+	SetPassword(ciphertext string) // Sets the password of the User
 }
