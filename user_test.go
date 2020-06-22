@@ -2,6 +2,8 @@ package steranko
 
 import (
 	"github.com/benpate/data"
+	"github.com/benpate/data/expression"
+	"github.com/benpate/data/journal"
 	"github.com/benpate/derp"
 )
 
@@ -11,7 +13,7 @@ type testUser struct {
 	UserID   string
 	Username string
 	Password string
-	data.Journal
+	journal.Journal
 }
 
 func (tu testUser) ID() string {
@@ -46,7 +48,7 @@ func (t *testUserService) New() User {
 
 func (t *testUserService) Load(username string) (User, *derp.Error) {
 
-	filter := data.Expression{{"username", "=", username}}
+	filter := expression.New({"username", "=", username}}
 	result := &testUser{}
 
 	err := t.session.Load("User", filter, result)
