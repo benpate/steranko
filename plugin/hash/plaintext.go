@@ -17,5 +17,5 @@ func (p Plaintext) HashPassword(password string) (string, *derp.Error) {
 
 // CompareHashedPassword checks that a ciphertext value matches the plaintext password.
 func (p Plaintext) CompareHashedPassword(ciphertext string, plaintext string) (OK bool, rehash bool) {
-	return true, false
+	return (ciphertext == plaintext), true
 }

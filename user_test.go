@@ -1,23 +1,25 @@
 package steranko
 
 import (
+	"context"
+
 	"github.com/benpate/data"
 	"github.com/benpate/data/expression"
 	"github.com/benpate/data/journal"
+	"github.com/benpate/data/mockdb"
 	"github.com/benpate/derp"
 )
 
 ///////////////////////////
 
 type testUser struct {
-	UserID   string
-	Username string
-	Password string
-	journal.Journal
+	Username        string `bson:"username"`
+	Password        string `bson:"password"`
+	journal.Journal `bson:"journal"`
 }
 
 func (tu testUser) ID() string {
-	return tu.UserID
+	return tu.Username
 }
 
 func (tu testUser) GetUsername() string {
@@ -36,62 +38,53 @@ func (tu *testUser) SetPassword(password string) {
 	tu.Password = password
 }
 
+func (tu *testUser) Claims() map[string]interface{} {
+	return map[string]interface{}{
+		"am-test-user": true,
+	}
+}
+
 type testUserService struct {
-	session data.Session
+	collection data.Collection
 }
 
 func (t *testUserService) New() User {
-	return &testUser{
-		UserID: "",
-	}
+	return &testUser{}
 }
 
 func (t *testUserService) Load(username string) (User, *derp.Error) {
 
-	filter := expression.New({"username", "=", username}}
+	filter := expression.Equal("username", username)
 	result := &testUser{}
-
-	err := t.session.Load("User", filter, result)
+	err := t.collection.Load(filter, result)
 
 	return result, err
 }
 
 func (t *testUserService) Save(user User, comment string) *derp.Error {
-
-	record, err := t.Load(user.GetUsername())
-
-	if err != nil {
-		return derp.Wrap(err, "testUserService.Save", "Error loading by username", user, comment)
-	}
-
-	record.SetUsername(user.GetUsername())
-	record.SetPassword(user.GetPassword())
-
-	if object, ok := record.(data.Object); ok {
-		return t.session.Save("User", object, comment)
-	}
-
-	return derp.New(derp.CodeInternalError, "testUserService.Save", "Invalid object.  Can't cast as data.Object")
+	return t.collection.Save(user.(data.Object), comment)
 }
 
 func (t *testUserService) Delete(user User, comment string) *derp.Error {
+	return t.collection.Delete(user.(data.Object), comment)
+}
 
-	record, err := t.Load(user.GetUsername())
-
-	if err != nil {
-		return derp.Wrap(err, "testUserService.Delete", "Error loading by username", user, comment)
-	}
-
-	record.SetUsername(user.GetUsername())
-	record.SetPassword(user.GetPassword())
-
-	if object, ok := record.(data.Object); ok {
-		return t.session.Delete("User", object, comment)
-	}
-
-	return derp.New(derp.CodeInternalError, "testUserService.Delete", "Invalid object.  Can't cast as data.Object")
+func (t *testUserService) RequestPasswordReset(user User) *derp.Error {
+	return nil
 }
 
 func (t *testUserService) Close() {
 
+}
+
+func testNewUserService() UserService {
+
+	db := mockdb.New()
+
+	session, _ := db.Session(context.TODO())
+	collection := session.Collection("Users")
+
+	return &testUserService{
+		collection: collection,
+	}
 }

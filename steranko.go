@@ -1,22 +1,32 @@
 package steranko
 
-import "github.com/benpate/steranko/plugin"
-import "github.com/benpate/steranko/plugin/hash"
+import (
+	"github.com/benpate/steranko/plugin"
+	"github.com/benpate/steranko/plugin/hash"
+)
 
 // Steranko contains all required configuration information for this library.
 type Steranko struct {
 	UserService    UserService           // Service that provides CRUD operations on Users
+	Config         Config                // Configuration options for this library
 	PasswordHasher plugin.PasswordHasher // PasswordHasher uses a one-way encryption to obscure stored passwords.
 	PasswordRules  []plugin.PasswordRule // PasswordRules provide rules for enforcing password complexity
 }
 
 // New returns a fully initialized Steranko instance, with HandlerFuncs that support all of your user authentication and authorization needs.
-func New(userService UserService) *Steranko {
-	return &Steranko{
-		UserService:    userService,
-		PasswordHasher: hash.BCrypt(15),
+func New(userService UserService, config Config) *Steranko {
+
+	result := Steranko{
+		UserService: userService,
+		Config:      config,
+		// PasswordHasher: hash.BCrypt(15),
+		PasswordHasher: hash.Plaintext{},
 		PasswordRules:  []plugin.PasswordRule{},
 	}
+
+	// Parse password rules from config file here
+
+	return &result
 }
 
 // UsePasswordRule adds a plugin to the Steranko instance, so that it will be called at the appropriate points in the workflow.

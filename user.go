@@ -21,6 +21,8 @@ type UserService interface {
 	// Delete removes a single User from the database
 	Delete(user User, comment string) *derp.Error
 
+	RequestPasswordReset(user User) *derp.Error
+
 	// Close cleans up any connections opened by the service.
 	Close()
 }
@@ -32,6 +34,7 @@ type User interface {
 	GetUsername() string // Returns the username of the User
 	GetPassword() string // Returns the password of the User
 
-	SetUsername(username string)   // Sets the username of the User
-	SetPassword(ciphertext string) // Sets the password of the User
+	SetUsername(username string)    // Sets the username of the User
+	SetPassword(ciphertext string)  // Sets the password of the User
+	Claims() map[string]interface{} // Returns all claims (permissions) that this user has.
 }
