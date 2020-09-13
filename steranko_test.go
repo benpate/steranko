@@ -1,36 +1,48 @@
 package steranko
 
 import (
-	"testing"
+	"context"
 
-	"github.com/stretchr/testify/require"
+	"github.com/benpate/data"
+	"github.com/benpate/data/mockdb"
 )
 
-func TestNew(t *testing.T) {
+func getTestSteranko() *Steranko {
+	return New(getTestUserService(), Config{
+		Token: "header:Authentication",
+	})
+}
 
-	userService := testNewUserService()
+func getTestUserService() UserService {
+
+	userService := testUserService{
+		collection: getTestCollection(),
+	}
 
 	mike := userService.New()
 	mike.SetUsername("michael@jackson.com")
 	mike.SetPassword("hee-hee")
+	userService.Save(mike, "Created")
 
-	err := userService.Save(mike, "Creating Mike")
-	require.Nil(t, err)
+	janet := userService.New()
+	janet.SetUsername("janet@jackson.com")
+	janet.SetPassword("nasty")
+	userService.Save(janet, "Created")
 
-	s := New(userService, Config{})
+	andy := userService.New()
+	andy.SetUsername("andrew@jackson.com")
+	andy.SetPassword("whitehouse")
+	userService.Save(andy, "Created")
 
-	{
-		user, err := s.Authenticate("michael@jackson.com", "hee-hee")
-		require.Nil(t, err)
-		require.NotNil(t, user)
-		require.Equal(t, "michael@jackson.com", user.GetUsername())
-		require.Equal(t, "hee-hee", user.GetPassword())
-	}
+	return &userService
+}
 
-	{
-		user, err := s.Authenticate("michael@jackson.com", "hoo-hoo")
-		require.Nil(t, user)
-		require.NotNil(t, err)
-	}
+func getTestCollection() data.Collection {
 
+	db := mockdb.New()
+
+	session, _ := db.Session(context.TODO())
+	collection := session.Collection("Users")
+
+	return collection
 }

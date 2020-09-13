@@ -1,16 +1,15 @@
 package steranko
 
 import (
-	"context"
-
 	"github.com/benpate/data"
 	"github.com/benpate/data/expression"
 	"github.com/benpate/data/journal"
-	"github.com/benpate/data/mockdb"
 	"github.com/benpate/derp"
 )
 
-///////////////////////////
+///////////////////////////////
+// Test User Model Object
+///////////////////////////////
 
 type testUser struct {
 	Username        string `bson:"username"`
@@ -44,6 +43,10 @@ func (tu *testUser) Claims() map[string]interface{} {
 	}
 }
 
+///////////////////////////////
+// Test User Service
+///////////////////////////////
+
 type testUserService struct {
 	collection data.Collection
 }
@@ -75,16 +78,4 @@ func (t *testUserService) RequestPasswordReset(user User) *derp.Error {
 
 func (t *testUserService) Close() {
 
-}
-
-func testNewUserService() UserService {
-
-	db := mockdb.New()
-
-	session, _ := db.Session(context.TODO())
-	collection := session.Collection("Users")
-
-	return &testUserService{
-		collection: collection,
-	}
 }

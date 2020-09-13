@@ -3,6 +3,7 @@ package steranko
 import (
 	"github.com/benpate/steranko/plugin"
 	"github.com/benpate/steranko/plugin/hash"
+	"github.com/labstack/echo"
 )
 
 // Steranko contains all required configuration information for this library.
@@ -29,6 +30,15 @@ func New(userService UserService, config Config) *Steranko {
 	return &result
 }
 
+// Register applies all standard endpoints to the provided echo router.
+func (s *Steranko) Register(e *echo.Echo) {
+
+	e.POST("/signin", s.PostSignin)
+	e.POST("/password/token", s.PostPasswordToken)
+	e.POST("/password/update", s.PostPasswordUpdate)
+}
+
+/*
 // UsePasswordRule adds a plugin to the Steranko instance, so that it will be called at the appropriate points in the workflow.
 // This should only be called during system startup and initialization.
 func (s *Steranko) UsePasswordRule(rule plugin.PasswordRule) {
@@ -57,3 +67,4 @@ func (s *Steranko) RemovePlugin(name string) {
 		}
 	}
 }
+*/
