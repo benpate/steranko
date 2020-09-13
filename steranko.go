@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"github.com/benpate/schema"
 	"github.com/benpate/steranko/plugin"
 	"github.com/benpate/steranko/plugin/hash"
 	"github.com/labstack/echo"
@@ -12,6 +13,8 @@ type Steranko struct {
 	Config         Config                // Configuration options for this library
 	PasswordHasher plugin.PasswordHasher // PasswordHasher uses a one-way encryption to obscure stored passwords.
 	PasswordRules  []plugin.PasswordRule // PasswordRules provide rules for enforcing password complexity
+
+	passwordSchema *schema.Schema
 }
 
 // New returns a fully initialized Steranko instance, with HandlerFuncs that support all of your user authentication and authorization needs.

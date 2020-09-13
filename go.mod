@@ -7,6 +7,8 @@ require (
 	github.com/benpate/derp v0.15.0
 	github.com/benpate/list v0.2.0
 	github.com/benpate/remote v0.5.8
+	github.com/benpate/schema v0.7.1
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect

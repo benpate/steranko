@@ -1,7 +1,10 @@
 package steranko
 
 import (
+	"encoding/json"
+
 	"github.com/benpate/derp"
+	"github.com/benpate/schema"
 )
 
 // Authenticate verifies a username/password combination.
@@ -39,4 +42,29 @@ func (s *Steranko) Authenticate(username string, password string) (User, *derp.E
 	}
 
 	return user, nil
+}
+
+// ValidatePassword checks a password against the requirements in the Config structure.
+func (s *Steranko) ValidatePassword(password string) *derp.Error {
+
+	sch := s.PasswordSchema()
+
+	err := sch.Element.Validate(password)
+
+	if err != nil {
+		return derp.Wrap(err, "steranko.ValidatePassword", "Password does not meet requirements")
+	}
+
+	return nil
+}
+
+// PasswordSchema returns the schema.Schema for validating passwords
+func (s *Steranko) PasswordSchema() *schema.Schema {
+
+	if s.passwordSchema == nil {
+		s.passwordSchema = &schema.Schema{}
+		json.Unmarshal([]byte(s.Config.PasswordSchema), s.passwordSchema)
+	}
+
+	return s.passwordSchema
 }

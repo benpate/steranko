@@ -3,6 +3,7 @@ package steranko
 import (
 	"testing"
 
+	"github.com/benpate/schema"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,4 +35,31 @@ func TestAuthenticate(t *testing.T) {
 		require.Nil(t, user)
 		require.NotNil(t, err)
 	}
+}
+
+func TestValidatePassword(t *testing.T) {
+
+	{
+		s := New(getTestUserService(), Config{
+			PasswordSchema: `{"type":"string", "minLength":10, "maxLength":20}`,
+		})
+
+		require.NotNil(t, s.ValidatePassword("too-short"))
+		require.NotNil(t, s.ValidatePassword("this-password-is-way-too-long"))
+		require.Nil(t, s.ValidatePassword("valid-password"))
+	}
+}
+
+func TestPasswordSchema(t *testing.T) {
+
+	s := New(getTestUserService(), Config{
+		PasswordSchema: `{"type":"string", "minLength":0, "maxLength":20}`,
+	})
+
+	sch := s.PasswordSchema()
+
+	require.NotNil(t, sch)
+	require.IsType(t, &schema.String{}, sch.Element)
+	require.Equal(t, 0, sch.Element.(*schema.String).MinLength.Int())
+	require.Equal(t, 20, sch.Element.(*schema.String).MaxLength.Int())
 }
