@@ -9,7 +9,8 @@ import (
 
 func getTestSteranko() *Steranko {
 	return New(getTestUserService(), Config{
-		Token: "header:Authentication",
+		Token:          "header:Authentication",
+		PasswordSchema: `{"type":"string", "minLength":10, "maxLength":20}`,
 	})
 }
 

@@ -39,15 +39,11 @@ func TestAuthenticate(t *testing.T) {
 
 func TestValidatePassword(t *testing.T) {
 
-	{
-		s := New(getTestUserService(), Config{
-			PasswordSchema: `{"type":"string", "minLength":10, "maxLength":20}`,
-		})
+	s := getTestSteranko()
 
-		require.NotNil(t, s.ValidatePassword("too-short"))
-		require.NotNil(t, s.ValidatePassword("this-password-is-way-too-long"))
-		require.Nil(t, s.ValidatePassword("valid-password"))
-	}
+	require.NotNil(t, s.ValidatePassword("too-short"))
+	require.NotNil(t, s.ValidatePassword("this-password-is-way-too-long"))
+	require.Nil(t, s.ValidatePassword("valid-password"))
 }
 
 func TestPasswordSchema(t *testing.T) {

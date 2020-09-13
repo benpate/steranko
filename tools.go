@@ -47,11 +47,7 @@ func (s *Steranko) Authenticate(username string, password string) (User, *derp.E
 // ValidatePassword checks a password against the requirements in the Config structure.
 func (s *Steranko) ValidatePassword(password string) *derp.Error {
 
-	sch := s.PasswordSchema()
-
-	err := sch.Element.Validate(password)
-
-	if err != nil {
+	if err := s.PasswordSchema().Validate(password); err != nil {
 		return derp.Wrap(err, "steranko.ValidatePassword", "Password does not meet requirements")
 	}
 
