@@ -4,7 +4,7 @@ import (
 	"github.com/benpate/schema"
 	"github.com/benpate/steranko/plugin"
 	"github.com/benpate/steranko/plugin/hash"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // Steranko contains all required configuration information for this library.

@@ -2,7 +2,7 @@ package steranko
 
 import (
 	"github.com/benpate/derp"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // Signin implements the http.HandlerFunc signature, and should
