@@ -3,10 +3,10 @@ module github.com/benpate/steranko
 go 1.15
 
 require (
-	github.com/benpate/data v0.9.3
+	github.com/benpate/data v0.9.4
 	github.com/benpate/derp v0.18.0
 	github.com/benpate/list v0.3.0
-	github.com/benpate/remote v0.5.8
+	github.com/benpate/remote v0.6.0
 	github.com/benpate/schema v0.8.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

@@ -5,14 +5,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Signin implements the http.HandlerFunc signature, and should
+// PostSignin implements the http.HandlerFunc signature, and should
 // be wired in to your REST API to allow users to sign in to their accounts.
 func (s *Steranko) PostSignin(ctx echo.Context) error {
 
 	txn := SigninTransaction{}
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Wrap(err, "steranko.PostSigninTransaction", "Error binding transaction parameters").Report()
+		return derp.Report(derp.Wrap(err, "steranko.PostSigninTransaction", "Error binding transaction parameters"))
 	}
 
 	// try to authenticate the user

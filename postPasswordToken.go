@@ -14,14 +14,14 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 	txn := SigninTransaction{}
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Wrap(err, "steranko.PostSigninTransaction", "Error binding transaction parameters").Report()
+		return derp.Report(derp.Wrap(err, "steranko.PostSigninTransaction", "Error binding transaction parameters"))
 	}
 
 	user, err := s.UserService.Load(txn.Username)
 
 	if err != nil {
 
-		if err.NotFound() {
+		if derp.NotFound(err) {
 			return derp.New(CodeUnauthorized, "steranko.PostSigninTransaction", "Unauthorized")
 		}
 

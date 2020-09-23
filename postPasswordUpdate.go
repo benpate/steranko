@@ -13,14 +13,14 @@ func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 	txn := UpdatePasswordTransaction{}
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Error binding transaction parameters").Report()
+		return derp.Report(derp.Wrap(err, "steranko.PostPasswordUpdate", "Error binding transaction parameters"))
 	}
 
 	// try to authenticate the user with their old password
 	user, err := s.Authenticate(txn.Username, txn.OldPassword)
 
 	if err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Cannot authenticate user", txn.Username).Report()
+		return derp.Report(derp.Wrap(err, "steranko.PostPasswordUpdate", "Cannot authenticate user", txn.Username))
 	}
 
 	if err := s.ValidatePassword(txn.NewPassword); err != nil {
@@ -31,7 +31,7 @@ func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 	user.SetPassword(txn.NewPassword)
 
 	if err := s.UserService.Save(user, "Steranko: User Requested Password Update"); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Error saving user record", user).Report()
+		return derp.Report(derp.Wrap(err, "steranko.PostPasswordUpdate", "Error saving user record", user))
 	}
 
 	// Silence means success.

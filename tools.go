@@ -15,7 +15,7 @@ func (s *Steranko) Authenticate(username string, password string) (User, error) 
 
 	if err != nil {
 
-		if err.NotFound() {
+		if derp.NotFound(err) {
 			return nil, derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username)
 		}
 
