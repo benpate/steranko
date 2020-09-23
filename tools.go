@@ -8,7 +8,7 @@ import (
 )
 
 // Authenticate verifies a username/password combination.
-func (s *Steranko) Authenticate(username string, password string) (User, *derp.Error) {
+func (s *Steranko) Authenticate(username string, password string) (User, error) {
 
 	// Try to load the User from the UserService
 	user, err := s.UserService.Load(username)
@@ -45,7 +45,7 @@ func (s *Steranko) Authenticate(username string, password string) (User, *derp.E
 }
 
 // ValidatePassword checks a password against the requirements in the Config structure.
-func (s *Steranko) ValidatePassword(password string) *derp.Error {
+func (s *Steranko) ValidatePassword(password string) error {
 
 	if err := s.PasswordSchema().Validate(password); err != nil {
 		return derp.Wrap(err, "steranko.ValidatePassword", "Password does not meet requirements")

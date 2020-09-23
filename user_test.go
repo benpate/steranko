@@ -4,7 +4,6 @@ import (
 	"github.com/benpate/data"
 	"github.com/benpate/data/expression"
 	"github.com/benpate/data/journal"
-	"github.com/benpate/derp"
 )
 
 ///////////////////////////////
@@ -55,7 +54,7 @@ func (t *testUserService) New() User {
 	return &testUser{}
 }
 
-func (t *testUserService) Load(username string) (User, *derp.Error) {
+func (t *testUserService) Load(username string) (User, error) {
 
 	filter := expression.Equal("username", username)
 	result := &testUser{}
@@ -64,15 +63,15 @@ func (t *testUserService) Load(username string) (User, *derp.Error) {
 	return result, err
 }
 
-func (t *testUserService) Save(user User, comment string) *derp.Error {
+func (t *testUserService) Save(user User, comment string) error {
 	return t.collection.Save(user.(data.Object), comment)
 }
 
-func (t *testUserService) Delete(user User, comment string) *derp.Error {
+func (t *testUserService) Delete(user User, comment string) error {
 	return t.collection.Delete(user.(data.Object), comment)
 }
 
-func (t *testUserService) RequestPasswordReset(user User) *derp.Error {
+func (t *testUserService) RequestPasswordReset(user User) error {
 	return nil
 }
 

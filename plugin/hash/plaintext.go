@@ -1,7 +1,5 @@
 package hash
 
-import "github.com/benpate/derp"
-
 // Plaintext is an awful password encryption scheme that should NEVER be used outside of initial development.
 type Plaintext struct{}
 
@@ -11,7 +9,7 @@ func (p Plaintext) ID() string {
 }
 
 // HashPassword returns a hashed value for the password.
-func (p Plaintext) HashPassword(password string) (string, *derp.Error) {
+func (p Plaintext) HashPassword(password string) (string, error) {
 	return password, nil
 }
 

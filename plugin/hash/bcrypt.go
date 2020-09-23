@@ -15,7 +15,7 @@ func (bc BCrypt) ID() string {
 }
 
 // HashPassword returns a hashed value for the password.
-func (bc BCrypt) HashPassword(plaintext string) (hashedValue string, error *derp.Error) {
+func (bc BCrypt) HashPassword(plaintext string) (hashedValue string, error error) {
 
 	result, err := bcrypt.GenerateFromPassword([]byte(plaintext), int(bc))
 

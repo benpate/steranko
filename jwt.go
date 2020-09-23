@@ -11,7 +11,7 @@ import (
 
 // createJWT creates a new JWT token for the provided user.
 // TODO: include additional configuration options when defined.
-func (s *Steranko) createJWT(user User) (string, *derp.Error) {
+func (s *Steranko) createJWT(user User) (string, error) {
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims = jwt.MapClaims(user.Claims())
