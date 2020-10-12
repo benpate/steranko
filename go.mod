@@ -3,7 +3,7 @@ module github.com/benpate/steranko
 go 1.15
 
 require (
-	github.com/benpate/data v0.9.4
+	github.com/benpate/data v0.9.6
 	github.com/benpate/derp v0.18.0
 	github.com/benpate/list v0.3.0
 	github.com/benpate/remote v0.6.0
