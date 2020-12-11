@@ -49,7 +49,7 @@ func TestValidatePassword(t *testing.T) {
 func TestPasswordSchema(t *testing.T) {
 
 	s := New(getTestUserService(), Config{
-		PasswordSchema: `{"type":"string", "minLength":0, "maxLength":20}`,
+		PasswordSchema: schema.Unmarshal(`{"type":"string", "minLength":0, "maxLength":20}`),
 	})
 
 	sch := s.PasswordSchema()

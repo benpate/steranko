@@ -1,8 +1,6 @@
 package steranko
 
 import (
-	"encoding/json"
-
 	"github.com/benpate/derp"
 	"github.com/benpate/schema"
 )
@@ -58,8 +56,7 @@ func (s *Steranko) ValidatePassword(password string) error {
 func (s *Steranko) PasswordSchema() *schema.Schema {
 
 	if s.passwordSchema == nil {
-		s.passwordSchema = &schema.Schema{}
-		json.Unmarshal([]byte(s.Config.PasswordSchema), s.passwordSchema)
+		s.passwordSchema = &s.Config.PasswordSchema
 	}
 
 	return s.passwordSchema

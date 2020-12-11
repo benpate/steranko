@@ -7,7 +7,7 @@ require (
 	github.com/benpate/derp v0.19.0
 	github.com/benpate/list v0.3.0
 	github.com/benpate/remote v0.6.0
-	github.com/benpate/schema v0.9.0
+	github.com/benpate/schema v0.9.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/stretchr/testify v1.6.1
