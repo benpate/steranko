@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/benpate/data v0.10.0
-	github.com/benpate/derp v0.19.0
+	github.com/benpate/derp v0.19.1
 	github.com/benpate/list v0.3.0
 	github.com/benpate/remote v0.6.0
 	github.com/benpate/schema v0.9.3

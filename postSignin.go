@@ -12,21 +12,21 @@ func (s *Steranko) PostSignin(ctx echo.Context) error {
 	txn := SigninTransaction{}
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Report(derp.Wrap(err, "steranko.PostSigninTransaction", "Error binding transaction parameters"))
+		return derp.Report(derp.Wrap(err, "steranko.PostSigninTransaction", "Invalid authentication request ."))
 	}
 
 	// try to authenticate the user
 	user, err := s.Authenticate(txn.Username, txn.Password)
 
 	if err != nil {
-		return derp.Wrap(err, "steranko.PostSigninTransaction", "Error loading User account", txn.Username)
+		return derp.Wrap(err, "steranko.PostSigninTransaction", "Invalid username/password.  Please try again.")
 	}
 
 	// Try to create a JWT token
 	token, err := s.createJWT(user)
 
 	if err != nil {
-		return derp.Wrap(err, "steranko.PostSigninTransaction", "Error creating JWT token")
+		return derp.Wrap(err, "steranko.PostSigninTransaction", "Internal Error.  Please try again later.")
 	}
 
 	// Set this token to the context
