@@ -14,10 +14,10 @@ func (s *Steranko) Authenticate(username string, password string) (User, error) 
 	if err != nil {
 
 		if derp.NotFound(err) {
-			return nil, derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username)
+			return nil, derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "user not found")
 		}
 
-		return nil, derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username)
+		return nil, derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username, "database error")
 	}
 
 	// Fall through means that we have a matching user account.
@@ -26,7 +26,7 @@ func (s *Steranko) Authenticate(username string, password string) (User, error) 
 	ok, update := s.PasswordHasher.CompareHashedPassword(password, user.GetPassword())
 
 	if ok == false {
-		return nil, derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username)
+		return nil, derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "invalid password")
 	}
 
 	if update == true {
