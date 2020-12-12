@@ -30,6 +30,8 @@ github.com/benpate/derp v0.15.0/go.mod h1:Zne8hUcv/ljV0xIDe58OIbcSSEl7Ckm81oWZ5N
 github.com/benpate/derp v0.18.0/go.mod h1:Zne8hUcv/ljV0xIDe58OIbcSSEl7Ckm81oWZ5NCozz0=
 github.com/benpate/derp v0.19.0 h1:ge3O4QeXTfePUYFjxNGhepJ3tB43PHNX/pFuHoJmXvI=
 github.com/benpate/derp v0.19.0/go.mod h1:ppa9ihhpc+leDW8d5GKklLicyE6BMuM22MQmObjO8q8=
+github.com/benpate/derp v0.19.1 h1:7a5LcRG8FacUJDX1lTpLAazeavHf60IeNw4GFs9W+V0=
+github.com/benpate/derp v0.19.1/go.mod h1:ENjMpkMmxn9gAulMAggElVcD2kNrsbjFhoZK8fUlCxY=
 github.com/benpate/list v0.2.0 h1:Ln8tBGuzLgcdNL+vcYfVeIfCm4WPUE4g5ziOhEA6ZoU=
 github.com/benpate/list v0.2.0/go.mod h1:uemdCNP+Ycdcamt3XMLtA5g1Zv8ukCC1ClaN+ppX5og=
 github.com/benpate/list v0.3.0 h1:ke7xb8i+yDXHhUUzB7yCD/J73g9dS/BOwZ/pOso4xEo=
