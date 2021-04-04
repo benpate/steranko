@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/benpate/data"
-	"github.com/benpate/data/mockdb"
+	"github.com/benpate/data-mock"
 	"github.com/benpate/schema"
 )
 

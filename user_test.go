@@ -2,8 +2,8 @@ package steranko
 
 import (
 	"github.com/benpate/data"
-	"github.com/benpate/data/expression"
 	"github.com/benpate/data/journal"
+	"github.com/benpate/exp"
 )
 
 ///////////////////////////////
@@ -56,7 +56,7 @@ func (t *testUserService) New() User {
 
 func (t *testUserService) Load(username string) (User, error) {
 
-	filter := expression.Equal("username", username)
+	filter := exp.Equal("username", username)
 	result := &testUser{}
 	err := t.collection.Load(filter, result)
 
