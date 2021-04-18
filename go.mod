@@ -9,7 +9,7 @@ require (
 	github.com/benpate/exp v0.0.2
 	github.com/benpate/list v0.4.0
 	github.com/benpate/remote v0.6.1
-	github.com/benpate/schema v0.9.3
+	github.com/benpate/schema v0.10.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/labstack/echo/v4 v4.1.17
