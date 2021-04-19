@@ -1,11 +1,6 @@
 package steranko
 
-import (
-	"testing"
-
-	"github.com/stretchr/testify/require"
-)
-
+/*
 func TestPostSignin_Success(t *testing.T) {
 
 	s := getTestSteranko()
@@ -39,3 +34,4 @@ func TestPostSignin_Failure(t *testing.T) {
 	require.Equal(t, "andrew@jackson.com", result.Username)
 	require.Empty(t, result.JWT)
 }
+*/

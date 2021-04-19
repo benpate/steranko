@@ -2,36 +2,36 @@ package steranko
 
 import (
 	"github.com/benpate/derp"
+	"github.com/labstack/echo/v4"
 )
 
-// PostSignin implements the http.HandlerFunc signature, and should
-// be wired in to your REST API to allow users to sign in to their accounts.
-func (s *Steranko) Signin(txn SigninTransaction) SigninResponse {
+// Signin implements the echo.HandlerFunc, and can be used directly
+// in your REST API, or can be wrapped by your own custom function if
+// you want to extend its functionality.  If the signin is successful
+// it automatically sets the "Authorization" cookie in the user's browser.
+func (s *Steranko) Signin(ctx echo.Context) error {
+
+	var txn SigninTransaction
+
+	if err := ctx.Bind(&txn); err != nil {
+		return derp.New(500, "steranko.Signin", "Invalid Request. Please try again later.")
+	}
 
 	// try to authenticate the user
 	user, err := s.Authenticate(txn.Username, txn.Password)
 
 	if err != nil {
-		return SigninResponse{
-			Username:     txn.Username,
-			ErrorMessage: "Invalid username/password. Please try again.",
-			Error:        derp.Wrap(err, "steranko.PostSigninTransaction", "Error authenticating user"),
-		}
+		return derp.New(derp.CodeForbiddenError, "steranko.Signin", "Invalid username/password.  Please try again.")
 	}
 
 	// Try to create a JWT token
 	token, err := s.createJWT(user)
 
 	if err != nil {
-		return SigninResponse{
-			Username:     txn.Username,
-			ErrorMessage: "Internal Error.  Please try again later.",
-			Error:        derp.Wrap(err, "steranko.PostSigninTransaction", "Error generating JWT Token"),
-		}
+		return derp.New(derp.CodeInternalError, "steranko.Signin", "Internal error.  Please try again later.")
 	}
 
-	return SigninResponse{
-		Username: txn.Username,
-		JWT:      token,
-	}
+	s.setJWT(ctx, token)
+
+	return nil
 }
