@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Signin implements the echo.HandlerFunc, and can be used directly
+// SigniI implements the echo.HandlerFunc, and can be used directly
 // in your REST API, or can be wrapped by your own custom function if
 // you want to extend its functionality.  If the signin is successful
 // it automatically sets the "Authorization" cookie in the user's browser.
@@ -38,7 +38,9 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 	return nil
 }
 
-func SignOut(ctx echo.Context) error {
+// SignOut implements the echo.HandlerFunc, and can be used directly
+// in your REST API, or can be wrapped by your own custom function.
+func (s *Steranko) SignOut(ctx echo.Context) error {
 
 	ctx.SetCookie(&http.Cookie{
 		Name:     cookieName(ctx),         // Get the Cookie name to use for this context.
