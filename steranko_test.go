@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/benpate/data"
-	"github.com/benpate/data-mock"
+	mockdb "github.com/benpate/data-mock"
 	"github.com/benpate/schema"
 )
 
 func getTestSteranko() *Steranko {
-	return New(getTestUserService(), Config{
+	return New(getTestUserService(), getTestKeyService(), Config{
 		Token:          "header:Authorization",
 		PasswordSchema: schema.Unmarshal(`{"type":"string", "minLength":10, "maxLength":20}`),
 	})

@@ -9,9 +9,7 @@ import (
 
 func TestAuthenticate(t *testing.T) {
 
-	userService := getTestUserService()
-
-	s := New(userService, Config{})
+	s := New(getTestUserService(), getTestKeyService(), Config{})
 
 	{
 		// Test successful signin
@@ -48,7 +46,7 @@ func TestValidatePassword(t *testing.T) {
 
 func TestPasswordSchema(t *testing.T) {
 
-	s := New(getTestUserService(), Config{
+	s := New(getTestUserService(), getTestKeyService(), Config{
 		PasswordSchema: schema.Unmarshal(`{"type":"string", "minLength":0, "maxLength":20}`),
 	})
 

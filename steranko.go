@@ -18,10 +18,11 @@ type Steranko struct {
 }
 
 // New returns a fully initialized Steranko instance, with HandlerFuncs that support all of your user authentication and authorization needs.
-func New(userService UserService, config Config) *Steranko {
+func New(userService UserService, keyService KeyService, config Config) *Steranko {
 
 	result := Steranko{
 		UserService: userService,
+		KeyService:  keyService,
 		Config:      config,
 
 		// PasswordHasher: hash.BCrypt(15),
