@@ -35,7 +35,7 @@ func (s *Steranko) setJWT(ctx echo.Context, token string) {
 
 	// Set Cookies
 	ctx.SetCookie(&http.Cookie{
-		Name:     "Authorization",
+		Name:     cookieName(ctx),
 		Value:    token,                   // Set the cookie's value
 		MaxAge:   63072000,                // Max-Age is 2 YEARS (60s * 60min * 24h * 365d * 2y)
 		Path:     "/",                     // This allows the cookie on all paths of this site.
@@ -59,4 +59,16 @@ func (s *Steranko) setJWT(ctx echo.Context, token string) {
 		ctx.Response().Header().Set(name, token)
 	}
 	*/
+}
+
+func cookieName(ctx echo.Context) string {
+
+	// If this is a secure domain...
+	if ctx.IsTLS() {
+		// Use a cookie name that can only be set on an SSL connection, and is "domain-locked"
+		// [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#cookie_prefixes]
+		return "__Host-Authorization"
+	}
+
+	return "Authorization"
 }

@@ -11,7 +11,9 @@ func (s *Steranko) Middleware(required bool) echo.MiddlewareFunc {
 
 		return func(ctx echo.Context) error {
 
-			if cookie, err := ctx.Cookie("Authorization"); err == nil {
+			name := cookieName(ctx)
+
+			if cookie, err := ctx.Cookie(name); err == nil {
 
 				claims := s.UserService.NewClaims()
 
