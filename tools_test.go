@@ -25,16 +25,18 @@ func TestAuthenticate(t *testing.T) {
 		// Test bad password
 		user := s.UserService.New()
 		err := s.Authenticate("michael@jackson.com", "hoo-hoo", user)
-		require.Nil(t, user)
 		require.NotNil(t, err)
+		require.Equal(t, "michael@jackson.com", user.GetUsername())
+		require.Equal(t, "hee-hee", user.GetPassword())
 	}
 
 	{
 		// Test missing user
 		user := s.UserService.New()
 		err := s.Authenticate("kendall@jackson.com", "chardonay", user)
-		require.Nil(t, user)
 		require.NotNil(t, err)
+		require.Equal(t, "", user.GetUsername())
+		require.Equal(t, "", user.GetPassword())
 	}
 }
 

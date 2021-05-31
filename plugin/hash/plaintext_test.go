@@ -21,8 +21,16 @@ func TestPlaintext(t *testing.T) {
 		assert.Equal(t, plaintext, hashedValue)
 		assert.Nil(t, err)
 
-		ok, update := p.CompareHashedPassword(hashedValue, plaintext)
-		assert.True(t, ok)
-		assert.False(t, update)
+		{
+			ok, update := p.CompareHashedPassword(hashedValue, plaintext)
+			assert.True(t, ok)
+			assert.True(t, update)
+		}
+
+		{
+			ok, update := p.CompareHashedPassword(hashedValue, "literally anything else")
+			assert.False(t, ok)
+			assert.True(t, update)
+		}
 	}
 }

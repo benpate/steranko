@@ -7,7 +7,6 @@ require (
 	github.com/benpate/data-mock v0.0.1
 	github.com/benpate/derp v0.21.0
 	github.com/benpate/exp v0.0.2
-	github.com/benpate/list v0.4.0
 	github.com/benpate/remote v0.6.1
 	github.com/benpate/schema v0.10.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
