@@ -34,7 +34,7 @@ func TestPostPasswordUpdate_Fail(t *testing.T) {
 	// require.Equal(t, http.StatusBadRequest, rec.Code)
 
 	// Verify Password NOT changed
-	s.UserService.Load("andrew@jackson.com")
+	// s.UserService.Load("andrew@jackson.com", user)
 }
 
 func TestPostPasswordUpdate_Success(t *testing.T) {
@@ -60,6 +60,6 @@ func TestPostPasswordUpdate_Success(t *testing.T) {
 	require.Equal(t, http.StatusOK, rec.Code)
 
 	// Verify Password NOT changed
-	s.UserService.Load("andrew@jackson.com")
+	// s.UserService.Load("andrew@jackson.com")
 
 }

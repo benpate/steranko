@@ -18,13 +18,12 @@ func (t *testUserService) New() User {
 	return &testUser{}
 }
 
-func (t *testUserService) Load(username string) (User, error) {
+func (t *testUserService) Load(username string, user User) error {
 
 	filter := exp.Equal("username", username)
-	result := &testUser{}
-	err := t.collection.Load(filter, result)
+	err := t.collection.Load(filter, user.(*testUser))
 
-	return result, err
+	return err
 }
 
 func (t *testUserService) Save(user User, comment string) error {

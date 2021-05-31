@@ -6,18 +6,16 @@ import (
 )
 
 // Authenticate verifies a username/password combination.
-func (s *Steranko) Authenticate(username string, password string) (User, error) {
+func (s *Steranko) Authenticate(username string, password string, user User) error {
 
 	// Try to load the User from the UserService
-	user, err := s.UserService.Load(username)
-
-	if err != nil {
+	if err := s.UserService.Load(username, user); err != nil {
 
 		if derp.NotFound(err) {
-			return nil, derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "user not found")
+			return derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "user not found")
 		}
 
-		return nil, derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username, "database error")
+		return derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username, "database error")
 	}
 
 	// Fall through means that we have a matching user account.
@@ -25,11 +23,11 @@ func (s *Steranko) Authenticate(username string, password string) (User, error) 
 	// Try to authenticate the password
 	ok, update := s.PasswordHasher.CompareHashedPassword(password, user.GetPassword())
 
-	if ok == false {
-		return nil, derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "invalid password")
+	if !ok {
+		return derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "invalid password")
 	}
 
-	if update == true {
+	if update {
 
 		if hashedValue, err := s.PasswordHasher.HashPassword(password); err == nil {
 			user.SetPassword(hashedValue)
@@ -39,7 +37,7 @@ func (s *Steranko) Authenticate(username string, password string) (User, error) 
 		}
 	}
 
-	return user, nil
+	return nil
 }
 
 // ValidatePassword checks a password against the requirements in the Config structure.

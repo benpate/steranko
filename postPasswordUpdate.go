@@ -17,9 +17,9 @@ func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 	}
 
 	// try to authenticate the user with their old password
-	user, err := s.Authenticate(txn.Username, txn.OldPassword)
+	user := s.UserService.New()
 
-	if err != nil {
+	if err := s.Authenticate(txn.Username, txn.OldPassword, user); err != nil {
 		return derp.Report(derp.Wrap(err, "steranko.PostPasswordUpdate", "Cannot authenticate user", txn.Username))
 	}
 

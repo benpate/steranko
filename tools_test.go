@@ -13,7 +13,8 @@ func TestAuthenticate(t *testing.T) {
 
 	{
 		// Test successful signin
-		user, err := s.Authenticate("michael@jackson.com", "hee-hee")
+		user := s.UserService.New()
+		err := s.Authenticate("michael@jackson.com", "hee-hee", user)
 		require.Nil(t, err)
 		require.NotNil(t, user)
 		require.Equal(t, "michael@jackson.com", user.GetUsername())
@@ -22,14 +23,16 @@ func TestAuthenticate(t *testing.T) {
 
 	{
 		// Test bad password
-		user, err := s.Authenticate("michael@jackson.com", "hoo-hoo")
+		user := s.UserService.New()
+		err := s.Authenticate("michael@jackson.com", "hoo-hoo", user)
 		require.Nil(t, user)
 		require.NotNil(t, err)
 	}
 
 	{
 		// Test missing user
-		user, err := s.Authenticate("kendall@jackson.com", "chardonay")
+		user := s.UserService.New()
+		err := s.Authenticate("kendall@jackson.com", "chardonay", user)
 		require.Nil(t, user)
 		require.NotNil(t, err)
 	}

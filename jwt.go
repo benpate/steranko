@@ -45,6 +45,7 @@ func (s *Steranko) setJWT(ctx echo.Context, token string) {
 		// NOTE: Domain is excluded because it is less restrictive than omitting it. [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies]
 	})
 
+	// TODO: refresh tokens after XX amount of time.
 	/* Remove old code for now. May want to re-enable authentication tokens in the header at some point in the future.
 
 	// Return Tokens??
@@ -61,12 +62,14 @@ func (s *Steranko) setJWT(ctx echo.Context, token string) {
 	*/
 }
 
+// cookieName returns the correct cookie name to use, based on the kind of connection.
+// If connecting via HTTP, then "Authorization" is used.
+// If connecting via SSL, then "__Host-Authorization" is used so that the cookie is "domain locked".  See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#cookie_prefixes]
 func cookieName(ctx echo.Context) string {
 
 	// If this is a secure domain...
 	if ctx.IsTLS() {
 		// Use a cookie name that can only be set on an SSL connection, and is "domain-locked"
-		// [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#cookie_prefixes]
 		return "__Host-Authorization"
 	}
 

@@ -17,7 +17,7 @@ func getTestSteranko() *Steranko {
 
 func getTestUserService() UserService {
 
-	userService := testUserService{
+	userService := &testUserService{
 		collection: getTestCollection(),
 	}
 
@@ -36,7 +36,7 @@ func getTestUserService() UserService {
 	andy.SetPassword("whitehouse")
 	userService.Save(andy, "Created")
 
-	return &userService
+	return userService
 }
 
 func getTestCollection() data.Collection {

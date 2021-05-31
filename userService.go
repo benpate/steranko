@@ -11,7 +11,7 @@ type UserService interface {
 	New() User
 
 	// Load retrieves a single User from the database
-	Load(username string) (User, error)
+	Load(username string, user User) error
 
 	// Save inserts/updates a single User in the database
 	Save(user User, comment string) error

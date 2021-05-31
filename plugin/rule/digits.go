@@ -15,7 +15,7 @@ func (rule MinDigits) Name() string {
 // PasswordRuleDescription returns a localized, human-friendly description of the password rule.
 func (rule MinDigits) PasswordRuleDescription(language string) string {
 
-	return fmt.Sprint("Must be at least %i characters long.")
+	return fmt.Sprint("Must be at least %i characters long.", rule)
 }
 
 // ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaining the problem.

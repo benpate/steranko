@@ -19,10 +19,10 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 		return derp.New(500, "steranko.Signin", "Invalid Request. Please try again later.")
 	}
 
-	// try to authenticate the user
-	user, err := s.Authenticate(txn.Username, txn.Password)
+	user := s.UserService.New()
 
-	if err != nil {
+	// try to authenticate the user
+	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
 		return derp.New(derp.CodeForbiddenError, "steranko.Signin", "Invalid username/password.  Please try again.")
 	}
 
