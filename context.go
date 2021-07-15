@@ -13,7 +13,7 @@ type Context struct {
 	echo.Context
 }
 
-func (ctx Context) Authorization() (jwt.Claims, error) {
+func (ctx *Context) Authorization() (jwt.Claims, error) {
 
 	// Only comput this once, then store in the context for next time.
 	if ctx.claims == nil {
