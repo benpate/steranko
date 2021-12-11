@@ -1,6 +1,6 @@
 package steranko
 
-import "github.com/dgrijalva/jwt-go"
+import "github.com/golang-jwt/jwt/v4"
 
 // UserService wraps all of the functions that must be provided to Steranko by your application.
 // This API matches the presto.Service API very closely, so it should be possible to wrap an

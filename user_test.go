@@ -2,7 +2,7 @@ package steranko
 
 import (
 	"github.com/benpate/data/journal"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
 ///////////////////////////////

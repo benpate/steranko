@@ -1,6 +1,6 @@
 package steranko
 
-import "github.com/dgrijalva/jwt-go"
+import "github.com/golang-jwt/jwt/v4"
 
 // User interface wraps all of the functions that Steranko needs to authorize a user of the system.
 // This is done so that Steranko can be retrofitted on to your existing data objects.  Just implement

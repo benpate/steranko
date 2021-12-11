@@ -3,7 +3,7 @@ package steranko
 import (
 	"github.com/benpate/data"
 	"github.com/benpate/exp"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 )
 
 ///////////////////////////////
