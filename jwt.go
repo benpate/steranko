@@ -14,7 +14,6 @@ func (s *Steranko) createJWT(user User) (string, error) {
 	token.Claims = user.Claims()
 
 	keyID, key := s.KeyService.NewJWTKey()
-
 	token.Header["kid"] = keyID
 
 	// Generate encoded token and send it as response.
