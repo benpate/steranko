@@ -3,6 +3,8 @@ package steranko
 import (
 	"github.com/benpate/derp"
 	"github.com/benpate/schema"
+	"math/rand"
+	"time"
 )
 
 // Authenticate verifies a username/password combination.
@@ -37,6 +39,7 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 		}
 	}
 
+	// Success
 	return nil
 }
 
@@ -58,4 +61,12 @@ func (s *Steranko) PasswordSchema() *schema.Schema {
 	}
 
 	return s.passwordSchema
+}
+
+// sleepRandom sleeps for a random amount of time between the
+// minimum and maximum values
+func sleepRandom(min int, max int) {
+	rand.Seed(time.Now().UnixNano())
+	sleepTime := rand.Intn(max-min+1) + min
+	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 }
