@@ -1,9 +1,10 @@
 # Steranko 🔐
 
-[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/benpate/steranko)
-[![Go Report Card](https://goreportcard.com/badge/github.com/benpate/steranko?style=flat-square)](https://goreportcard.com/report/github.com/benpate/steranko)
-[![Build Status](http://img.shields.io/travis/benpate/steranko.svg?style=flat-square)](https://travis-ci.com/benpate/steranko)
+[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/benpate/steranko)
+[![Build Status](http://img.shields.io/travis/benpate/steranko.svg?style=flat-square)](https://travis-ci.org/benpate/steranko)
 [![Codecov](https://img.shields.io/codecov/c/github/benpate/steranko.svg?style=flat-square)](https://codecov.io/gh/benpate/steranko)
+[![Go Report Card](https://goreportcard.com/badge/github.com/benpate/steranko?style=flat-square)](https://goreportcard.com/report/github.com/benpate/steranko)
+![Version](https://img.shields.io/github/v/release/benpate/steranko?include_prereleases&style=flat-square&color=brightgreen)
 
 ## Website Authentication/Authorization for Go
 
@@ -15,13 +16,12 @@ To use Steranko, you have to implement two tiny interfaces in your code, then wi
 
 ```go
 s := steranko.New(userService, steranko.Conig{
-  Tokens: "cookie:auth",
-  PasswordSchema: `{"type":"string", "minLength":20}`
+    Tokens: "cookie:auth",
+    PasswordSchema: `{"type":"string", "minLength":20}`
 })
 
 s.Register(echo)
 ```
-
 
 ## Project Goals
 
@@ -35,6 +35,14 @@ s.Register(echo)
 * Password vulnerability via HaveIBeenPwned API.
 
 ### Possible future additions
+
+* Middleware tracks and blocks malicious users
+  * Errors (like 404, and 500) have an associated number of points.
+  * Track points per user/ip address with leaky bucket algorithm
+  * Block users with a certain number of points
+  * Ban users/ip addresses for repeated policy violations
+  * Admin console allows tweaking of rules, reinstatement of banned accounts.
+
 * Identify malicious users with a (relatively) invisible CAPTCHA system
   * Track javascript events during signup (keyup, keydown, mousemove, click)
   * Track timing of events.  They must not be too fast, or too consistent.
@@ -44,4 +52,4 @@ s.Register(echo)
 
 ## Pull Requests Welcome
 
-This library is a work in progress, and will benefit from your experience reports, use cases, and contributions.  If you have an idea for making Steranko better, send in a pull request.  We're all in this together! 🔐
+Steranko is a work in progress, and will benefit from your experience reports, use cases, and contributions.  If you have an idea for making this library better, send in a pull request.  We're all in this together! 🔐
