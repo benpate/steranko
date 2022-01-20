@@ -1,7 +1,6 @@
 package steranko
 
 import (
-	"github.com/benpate/path"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -11,10 +10,10 @@ import (
 type User interface {
 	GetUsername() string // Returns the username of the User
 	GetPassword() string // Returns the password of the User
-	GetPath(path.Path) (interface{}, error)
+	GetPath(string) (interface{}, bool)
 
 	SetUsername(username string)   // Sets the username of the User
 	SetPassword(ciphertext string) // Sets the password of the User
-	SetPath(path.Path, interface{}) error
+	SetPath(string, interface{}) error
 	Claims() jwt.Claims // Returns all claims (permissions) that this user has.
 }
