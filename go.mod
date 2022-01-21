@@ -7,7 +7,6 @@ require (
 	github.com/benpate/data-mock v0.1.0
 	github.com/benpate/derp v0.22.2
 	github.com/benpate/exp v0.1.0
-	github.com/benpate/path v0.8.0
 	github.com/benpate/remote v0.6.1
 	github.com/benpate/schema v0.12.0
 	github.com/golang-jwt/jwt/v4 v4.2.0
@@ -21,6 +20,7 @@ require (
 	github.com/benpate/convert v0.11.1 // indirect
 	github.com/benpate/list v0.4.2 // indirect
 	github.com/benpate/null v0.6.1 // indirect
+	github.com/benpate/path v0.8.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
