@@ -2,7 +2,6 @@ package steranko
 
 import (
 	"github.com/benpate/data/journal"
-	"github.com/benpate/derp"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -20,20 +19,12 @@ func (tu testUser) ID() string {
 	return tu.Username
 }
 
-func (tu testUser) GetPath(p string) (interface{}, bool) {
-	return nil, false
-}
-
 func (tu testUser) GetUsername() string {
 	return tu.Username
 }
 
 func (tu testUser) GetPassword() string {
 	return tu.Password
-}
-
-func (tu *testUser) SetPath(p string, value interface{}) error {
-	return derp.NewInternalError("steranko.testUser.SetPath", "Unsuppported")
 }
 
 func (tu *testUser) SetUsername(username string) {
