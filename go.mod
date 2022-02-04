@@ -8,7 +8,7 @@ require (
 	github.com/benpate/derp v0.22.2
 	github.com/benpate/exp v0.1.1
 	github.com/benpate/remote v0.6.1
-	github.com/benpate/schema v0.12.0
+	github.com/benpate/schema v0.13.0
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.6.3
 	github.com/stretchr/testify v1.7.0
@@ -16,8 +16,8 @@ require (
 )
 
 require (
-	github.com/benpate/compare v0.1.0 // indirect
-	github.com/benpate/convert v0.11.1 // indirect
+	github.com/benpate/compare v0.1.1 // indirect
+	github.com/benpate/convert v0.12.0 // indirect
 	github.com/benpate/list v0.4.2 // indirect
 	github.com/benpate/null v0.6.1 // indirect
 	github.com/benpate/path v0.8.1 // indirect
