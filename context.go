@@ -36,7 +36,7 @@ func (ctx *Context) Authorization() (jwt.Claims, error) {
 		}
 
 		if !token.Valid {
-			return nil, derp.New(derp.CodeForbiddenError, "steranko.Context.Claims", "Invalid token")
+			return nil, derp.NewForbiddenError("steranko.Context.Claims", "Invalid token")
 		}
 
 		// Save this value in the context for next time.

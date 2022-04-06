@@ -24,7 +24,7 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 	// try to authenticate the user
 	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
-		return derp.New(derp.CodeForbiddenError, "steranko.Signin", "Invalid username/password.  Please try again.")
+		return derp.NewForbiddenError("steranko.Signin", "Invalid username/password.  Please try again.")
 	}
 
 	// Try to create a JWT token
