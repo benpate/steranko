@@ -3,8 +3,8 @@ module github.com/benpate/steranko
 go 1.17
 
 require (
-	github.com/benpate/data v0.15.2
-	github.com/benpate/data-mock v0.1.0
+	github.com/benpate/data v0.16.0
+	github.com/benpate/data-mock v0.2.0
 	github.com/benpate/derp v0.22.2
 	github.com/benpate/exp v0.1.1
 	github.com/benpate/remote v0.6.1
@@ -30,6 +30,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.18 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
