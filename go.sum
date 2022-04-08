@@ -6,8 +6,8 @@ github.com/benpate/convert v0.12.0 h1:N4aTPQabpyoIgUSZNmkeP3t/kZo72rWaYQ9oX0ggBd
 github.com/benpate/convert v0.12.0/go.mod h1:kcwWFWAQFvp6s9s/w74gXIYRDvH7pqt83Ad9YIuwo8s=
 github.com/benpate/data v0.16.0 h1:Zkv5XwgYP9BGuX8MqQ1gBDCt/4Kr86knB8YHqzDvGrQ=
 github.com/benpate/data v0.16.0/go.mod h1:3SAaSNNExLhft16b68okYE/S/SU+aMqQ7qMtWvHAbQw=
-github.com/benpate/data-mock v0.2.0 h1:WV/SarDL8B4gKgVaJiGh8vZr7+AD7Pu0KyRrO/ZvhC4=
-github.com/benpate/data-mock v0.2.0/go.mod h1:EsCkKl9SbgyVYLz3MBap7RZjSd4rN3lNRBkEDieu6to=
+github.com/benpate/data-mock v0.2.1 h1:sf+yAHd341IZAEpH1qOcgGo9/RQpr4DD9zKFvKHMq9w=
+github.com/benpate/data-mock v0.2.1/go.mod h1:EsCkKl9SbgyVYLz3MBap7RZjSd4rN3lNRBkEDieu6to=
 github.com/benpate/derp v0.20.1/go.mod h1:ENjMpkMmxn9gAulMAggElVcD2kNrsbjFhoZK8fUlCxY=
 github.com/benpate/derp v0.22.2 h1:qPcnT32VG8gqhDR4y+dhK2n/0TMvZ3RUP+HbENNogAc=
 github.com/benpate/derp v0.22.2/go.mod h1:ENjMpkMmxn9gAulMAggElVcD2kNrsbjFhoZK8fUlCxY=
