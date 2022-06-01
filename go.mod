@@ -21,8 +21,7 @@ require (
 	github.com/benpate/convert v0.13.0 // indirect
 	github.com/benpate/htmlconv v0.3.3 // indirect
 	github.com/benpate/list v0.4.2 // indirect
-	github.com/benpate/null v0.6.1 // indirect
-	github.com/benpate/path v0.8.3 // indirect
+	github.com/benpate/null v0.6.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
