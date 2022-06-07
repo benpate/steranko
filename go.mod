@@ -11,7 +11,7 @@ require (
 	github.com/benpate/schema v0.15.0
 	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/labstack/echo/v4 v4.7.2
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.2
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 )
 
@@ -35,5 +35,5 @@ require (
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
