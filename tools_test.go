@@ -3,7 +3,7 @@ package steranko
 import (
 	"testing"
 
-	"github.com/benpate/schema"
+	"github.com/benpate/rosetta/schema"
 	"github.com/stretchr/testify/require"
 )
 

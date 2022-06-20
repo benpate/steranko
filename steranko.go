@@ -1,7 +1,7 @@
 package steranko
 
 import (
-	"github.com/benpate/schema"
+	"github.com/benpate/rosetta/schema"
 	"github.com/benpate/steranko/plugin"
 	"github.com/benpate/steranko/plugin/hash"
 )

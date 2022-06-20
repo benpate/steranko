@@ -1,10 +1,11 @@
 package steranko
 
 import (
-	"github.com/benpate/derp"
-	"github.com/benpate/schema"
 	"math/rand"
 	"time"
+
+	"github.com/benpate/derp"
+	"github.com/benpate/rosetta/schema"
 )
 
 // Authenticate verifies a username/password combination.

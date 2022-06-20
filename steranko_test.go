@@ -5,7 +5,7 @@ import (
 
 	"github.com/benpate/data"
 	mockdb "github.com/benpate/data-mock"
-	"github.com/benpate/schema"
+	"github.com/benpate/rosetta/schema"
 )
 
 func getTestSteranko() *Steranko {

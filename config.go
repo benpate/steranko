@@ -1,6 +1,6 @@
 package steranko
 
-import "github.com/benpate/schema"
+import "github.com/benpate/rosetta/schema"
 
 type Config struct {
 	Token          string        `json:"token"`          // Where to store authentication tokens.  Valid values are HEADER (default value) or COOKIE
