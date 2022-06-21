@@ -4,11 +4,11 @@ go 1.18
 
 require (
 	github.com/benpate/data v0.17.0
-	github.com/benpate/data-mock v0.4.0
+	github.com/benpate/data-mock v0.4.1
 	github.com/benpate/derp v0.22.2
 	github.com/benpate/exp v0.2.0
 	github.com/benpate/remote v0.6.1
-	github.com/benpate/rosetta v0.2.1
+	github.com/benpate/rosetta v0.2.2
 	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/stretchr/testify v1.7.4
