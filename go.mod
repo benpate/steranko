@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/benpate/data v0.19.0
 	github.com/benpate/data-mock v0.6.0
-	github.com/benpate/derp v0.24.0
+	github.com/benpate/derp v0.25.0
 	github.com/benpate/exp v0.5.0
 	github.com/benpate/remote v0.8.0
 	github.com/benpate/rosetta v0.6.0
