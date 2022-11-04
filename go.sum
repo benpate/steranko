@@ -1,7 +1,7 @@
 github.com/aymerick/douceur v0.2.0 h1:Mv+mAeH1Q+n9Fr+oyamOlAkUNPWPlA8PPGR0QAaYuPk=
 github.com/aymerick/douceur v0.2.0/go.mod h1:wlT5vV2O3h55X9m7iVYN0TBM0NH/MmbLnd30/FjWUq4=
-github.com/benpate/data v0.20.0 h1:rlmPhh9Wqg1E0298ZWTg6qanl+VbNOPkB6+rIppyXMs=
-github.com/benpate/data v0.20.0/go.mod h1:kCisr65xBIjv8vtQOahZwHey/b3WIGoqSCFwmL8Zyqo=
+github.com/benpate/data v0.21.0 h1:/2qyu5PiC3MENj8ZCVu8ewT78ZfCDlGNCJLXyKSbCI4=
+github.com/benpate/data v0.21.0/go.mod h1:kCisr65xBIjv8vtQOahZwHey/b3WIGoqSCFwmL8Zyqo=
 github.com/benpate/data-mock v0.21.0 h1:HiQi2bpOKADeWtQ7CwUFirKqSx1HmkJc0jKS78GrOmA=
 github.com/benpate/data-mock v0.21.0/go.mod h1:82GU1ZEc78XlYV6OUHuF6vW+QcNiCTlWv3/JXGwHkWI=
 github.com/benpate/derp v0.25.0 h1:q0nIAS9/G7XQnAcXnQPBdTfY75kRo+qq31vaGdq6Asw=
