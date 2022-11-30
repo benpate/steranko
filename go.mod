@@ -9,7 +9,7 @@ require (
 	github.com/benpate/exp v0.5.0
 	github.com/benpate/remote v0.8.0
 	github.com/benpate/rosetta v0.6.3
-	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b
