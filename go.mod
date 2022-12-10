@@ -11,7 +11,7 @@ require (
 	github.com/benpate/rosetta v0.6.3
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/labstack/echo/v4 v4.9.1
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b
 )
 
