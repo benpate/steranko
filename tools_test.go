@@ -59,6 +59,6 @@ func TestPasswordSchema(t *testing.T) {
 
 	require.NotNil(t, sch)
 	require.IsType(t, schema.String{}, sch.Element)
-	require.Equal(t, 0, sch.Element.(schema.String).MinLength.Int())
-	require.Equal(t, 20, sch.Element.(schema.String).MaxLength.Int())
+	require.Equal(t, 0, sch.Element.(schema.String).MinLength)
+	require.Equal(t, 20, sch.Element.(schema.String).MaxLength)
 }
