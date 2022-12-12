@@ -9,7 +9,6 @@ import (
 )
 
 // CreateCertificate creates a new JWT token for the provided user.
-// TODO: include additional configuration options when defined.
 func (s *Steranko) CreateCertificate(ctx echo.Context, user User) error {
 
 	// (short) random sleep to thwart timing attacks

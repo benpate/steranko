@@ -22,7 +22,7 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 	if err := s.UserService.Load(txn.Username, user); err != nil {
 
 		if derp.NotFound(err) {
-			return derp.New(CodeUnauthorized, "steranko.PostPasswordToken", "Unauthorized")
+			return derp.NewUnauthorizedError("steranko.PostPasswordToken", "Unauthorized")
 		}
 
 		return derp.Wrap(err, "steranko.PostPasswordToken", "Error loading User account", txn.Username)

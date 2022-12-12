@@ -16,7 +16,7 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 	var txn SigninTransaction
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.New(500, "steranko.Signin", "Invalid Request. Please try again later.")
+		return derp.NewInternalError("steranko.Signin", "Invalid Request. Please try again later.")
 	}
 
 	user := s.UserService.New()

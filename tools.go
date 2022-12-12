@@ -15,7 +15,7 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 	if err := s.UserService.Load(username, user); err != nil {
 
 		if derp.NotFound(err) {
-			return derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "user not found")
+			return derp.NewUnauthorizedError("steranko.Authenticate", "Unauthorized", username, "user not found")
 		}
 
 		return derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username, "database error")
@@ -27,7 +27,7 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 	ok, update := s.PasswordHasher.CompareHashedPassword(password, user.GetPassword())
 
 	if !ok {
-		return derp.New(CodeUnauthorized, "steranko.Authenticate", "Unauthorized", username, "invalid password")
+		return derp.NewUnauthorizedError("steranko.Authenticate", "Unauthorized", username, "invalid password")
 	}
 
 	if update {
