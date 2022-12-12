@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/benpate/data v0.21.0
 	github.com/benpate/data-mock v0.21.0
-	github.com/benpate/derp v0.25.0
-	github.com/benpate/exp v0.5.0
+	github.com/benpate/derp v0.25.1
+	github.com/benpate/exp v0.6.0
 	github.com/benpate/remote v0.8.0
-	github.com/benpate/rosetta v0.6.3
+	github.com/benpate/rosetta v0.7.0
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/stretchr/testify v1.8.1
@@ -26,8 +26,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	golang.org/x/net v0.0.0-20221004154528-8021a29435af // indirect
-	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.4.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
