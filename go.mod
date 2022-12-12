@@ -6,7 +6,7 @@ require (
 	github.com/benpate/data v0.21.0
 	github.com/benpate/data-mock v0.21.0
 	github.com/benpate/derp v0.25.0
-	github.com/benpate/exp v0.5.0
+	github.com/benpate/exp v0.6.0
 	github.com/benpate/remote v0.8.0
 	github.com/benpate/rosetta v0.6.3
 	github.com/golang-jwt/jwt/v4 v4.4.3
@@ -24,6 +24,7 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.21 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/net v0.0.0-20221004154528-8021a29435af // indirect
