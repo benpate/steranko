@@ -8,7 +8,7 @@ require (
 	github.com/benpate/derp v0.25.1
 	github.com/benpate/exp v0.6.0
 	github.com/benpate/remote v0.9.0
-	github.com/benpate/rosetta v0.8.0
+	github.com/benpate/rosetta v0.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/stretchr/testify v1.8.1
