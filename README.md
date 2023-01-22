@@ -1,7 +1,7 @@
 # Steranko 🔐
 
 [![GoDoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://pkg.go.dev/github.com/benpate/steranko)
-[![Build Status](https://img.shields.io/github/workflow/status/benpate/steranko/Go/master)](https://github.com/benpate/steranko/actions/workflows/go.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/benpate/steranko/go.yml?branch=master)](https://github.com/benpate/steranko/actions/workflows/go.yml)
 [![Codecov](https://img.shields.io/codecov/c/github/benpate/steranko.svg?style=flat-square)](https://codecov.io/gh/benpate/steranko)
 [![Go Report Card](https://goreportcard.com/badge/github.com/benpate/steranko?style=flat-square)](https://goreportcard.com/report/github.com/benpate/steranko)
 [![Version](https://img.shields.io/github/v/release/benpate/steranko?include_prereleases&style=flat-square&color=brightgreen)](https://github.com/benpate/steranko/releases)
