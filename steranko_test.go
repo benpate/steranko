@@ -2,6 +2,7 @@ package steranko
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/benpate/data"
 	mockdb "github.com/benpate/data-mock"
@@ -9,9 +10,14 @@ import (
 )
 
 func getTestSteranko() *Steranko {
+
+	var result schema.Schema
+
+	json.Unmarshal([]byte(`{"type":"string", "minLength":10, "maxLength":20}`), &result)
+
 	return New(getTestUserService(), getTestKeyService(), Config{
 		Token:          "header:Authorization",
-		PasswordSchema: schema.Unmarshal(`{"type":"string", "minLength":10, "maxLength":20}`),
+		PasswordSchema: result,
 	})
 }
 

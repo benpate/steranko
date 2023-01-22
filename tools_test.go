@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/benpate/rosetta/schema"
@@ -51,8 +52,12 @@ func TestValidatePassword(t *testing.T) {
 
 func TestPasswordSchema(t *testing.T) {
 
+	var input schema.Schema
+
+	json.Unmarshal([]byte(`{"type":"string", "minLength":0, "maxLength":20}`), &input)
+
 	s := New(getTestUserService(), getTestKeyService(), Config{
-		PasswordSchema: schema.Unmarshal(`{"type":"string", "minLength":0, "maxLength":20}`),
+		PasswordSchema: input,
 	})
 
 	sch := s.PasswordSchema()
