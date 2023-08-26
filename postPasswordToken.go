@@ -14,7 +14,7 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 	txn := SigninTransaction{}
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Report(derp.Wrap(err, "steranko.PostPasswordToken", "Error binding transaction parameters"))
+		return derp.Wrap(err, "steranko.PostPasswordToken", "Error binding transaction parameters")
 	}
 
 	user := s.UserService.New()
