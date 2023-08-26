@@ -3,12 +3,12 @@ module github.com/benpate/steranko
 go 1.18
 
 require (
-	github.com/benpate/data v0.27.0
-	github.com/benpate/data-mock v0.27.0
-	github.com/benpate/derp v0.27.2
+	github.com/benpate/data v0.28.0
+	github.com/benpate/data-mock v0.28.1
+	github.com/benpate/derp v0.28.0
 	github.com/benpate/exp v0.7.1
-	github.com/benpate/remote v0.10.4
-	github.com/benpate/rosetta v0.16.0
+	github.com/benpate/remote v0.10.7
+	github.com/benpate/rosetta v0.18.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/stretchr/testify v1.8.4
