@@ -1,15 +1,12 @@
 # Steranko 🔐
 
 [![GoDoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://pkg.go.dev/github.com/benpate/steranko)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/benpate/steranko/go.yml?branch=main)](https://github.com/benpate/steranko/actions/workflows/go.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/benpate/steranko.svg?style=flat-square)](https://codecov.io/gh/benpate/steranko)
-[![Go Report Card](https://goreportcard.com/badge/github.com/benpate/steranko?style=flat-square)](https://goreportcard.com/report/github.com/benpate/steranko)
 [![Version](https://img.shields.io/github/v/release/benpate/steranko?include_prereleases&style=flat-square&color=brightgreen)](https://github.com/benpate/steranko/releases)
-![Lines of Code](https://shields.io/tokei/lines/github.com/benpate/steranko)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/benpate/steranko/go.yml?style=flat-square)](https://github.com/benpate/steranko/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/benpate/steranko?style=flat-square)](https://goreportcard.com/report/github.com/benpate/steranko)
+[![Codecov](https://img.shields.io/codecov/c/github/benpate/steranko.svg?style=flat-square)](https://codecov.io/gh/benpate/steranko)
 
 ## Website Authentication/Authorization for Go
-
-**This project is a work-in-progress, and should NOT be used by ANYONE, for ANY PURPOSE, under ANY CIRCUMSTANCES.  It is GUARANTEED to blow up your computer, send your cat into an infinite loop, and combine your hot and cold laundry into a single cycle.**
 
 Steranko is an embeddable library that manages user authentication, and authorization.  You can configure it at run time (or compile time) to meet your specific project needs.
 
@@ -23,6 +20,10 @@ s := steranko.New(userService, steranko.Conig{
 
 s.Register(echo)
 ```
+
+## DO NOT USE
+
+This project is a work-in-progress, and should NOT be used by ANYONE, for ANY PURPOSE, under ANY CIRCUMSTANCES.  It is GUARANTEED to blow up your computer, send your cat into an infinite loop, and combine your hot and cold laundry into a single cycle.
 
 ## Project Goals
 
