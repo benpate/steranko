@@ -13,7 +13,7 @@ func TestPlaintext(t *testing.T) {
 	assert.Equal(t, "Plaintext", p.ID())
 
 	// https://www.xkcd.com/936/
-	testValues := []string{"trombone", "Tr0ub4dor&3", "correcthorsebatterystaple", "we hold these truths to be self evident, that all men are created equal, and are endowed by their creator with certain inalienable rights.  That among these rights are Life, Liberty, and the Persuit of Happiness."}
+	testValues := []string{"trombone", "Tr0ub4dor&3", "correcthorsebatterystaple", "we hold these truths to be self evident, that all men are created equal, and are endowed by their creator with certain inalienable rights.  That among these rights are Life, Liberty, and the Pursuit of Happiness."}
 
 	for _, plaintext := range testValues {
 
