@@ -33,8 +33,8 @@ func (api *API) ValidatePassword(password string, language string) (OK bool, mes
 	// Send the request to the remote API.  If this breaks, then we'll just get no breach reports and will return 'success'.
 	var response bytes.Buffer
 
-	transaction := remote.Get("https://api.pwnedpasswords.com/range/"+prefix).
-		Response(&response, nil)
+	transaction := remote.Get("https://api.pwnedpasswords.com/range/" + prefix).
+		Result(&response)
 
 	if err := transaction.Send(); err != nil {
 
