@@ -2,6 +2,8 @@ module github.com/benpate/steranko
 
 go 1.18
 
+replace github.com/benpate/remote => ../remote
+
 require (
 	github.com/benpate/data v0.28.1
 	github.com/benpate/data-mock v0.28.2
