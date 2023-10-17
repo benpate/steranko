@@ -2,7 +2,7 @@ package steranko
 
 import (
 	"github.com/benpate/derp"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,6 +29,7 @@ func (ctx *Context) Authorization() (jwt.Claims, error) {
 		claims := ctx.steranko.UserService.NewClaims()
 
 		// Parse it as a JWT token
+		// TODO: CRITICAL: Add WithValidateMthods() to this call.
 		token, err := jwt.ParseWithClaims(tokenString.Value, claims, ctx.steranko.KeyService.FindJWTKey)
 
 		if err != nil {

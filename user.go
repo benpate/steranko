@@ -1,7 +1,7 @@
 package steranko
 
 import (
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // User interface wraps all of the functions that Steranko needs to authorize a user of the system.
