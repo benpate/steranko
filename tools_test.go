@@ -54,7 +54,8 @@ func TestPasswordSchema(t *testing.T) {
 
 	var input schema.Schema
 
-	json.Unmarshal([]byte(`{"type":"string", "minLength":0, "maxLength":20}`), &input)
+	err := json.Unmarshal([]byte(`{"type":"string", "minLength":0, "maxLength":20}`), &input)
+	require.Nil(t, err)
 
 	s := New(getTestUserService(), getTestKeyService(), Config{
 		PasswordSchema: input,

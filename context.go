@@ -13,36 +13,23 @@ type Context struct {
 	echo.Context
 }
 
+// Authorization retrieves the JWT token claims from the context.
+// Values are cached so we don't re-parse the JWT cookie with mutiple calls.
 func (ctx *Context) Authorization() (jwt.Claims, error) {
 
-	// Only comput this once, then store in the context for next time.
-	if ctx.claims == nil {
-
-		// Retrieve the cookie value from the context
-		name := cookieName(ctx)
-		tokenString, err := ctx.Cookie(name)
-
-		if err != nil {
-			return nil, derp.Wrap(err, "steranko.Context.Claims", "Invalid cookie")
-		}
-
-		claims := ctx.steranko.UserService.NewClaims()
-
-		// Parse it as a JWT token
-		// TODO: CRITICAL: Add WithValidateMthods() to this call.
-		token, err := jwt.ParseWithClaims(tokenString.Value, claims, ctx.steranko.KeyService.FindJWTKey)
-
-		if err != nil {
-			return nil, derp.Wrap(err, "steranko.Context.Claims", "Error parsing token")
-		}
-
-		if !token.Valid {
-			return nil, derp.NewForbiddenError("steranko.Context.Claims", "Invalid token")
-		}
-
-		// Save this value in the context for next time.
-		ctx.claims = claims
+	// If we have already cached a claims value, then just use that
+	if ctx.claims != nil {
+		return ctx.claims, nil
 	}
 
+	// Get the claims from GetAuthorization()
+	claims, err := ctx.steranko.GetAuthorization(ctx.Request())
+
+	if err != nil {
+		return nil, derp.Wrap(err, "steranko.Context.Claims", "Error parsing token")
+	}
+
+	// Save the claims in the context (for next time, maybe) and return
+	ctx.claims = claims
 	return ctx.claims, nil
 }

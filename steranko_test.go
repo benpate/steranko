@@ -13,7 +13,9 @@ func getTestSteranko() *Steranko {
 
 	var result schema.Schema
 
-	json.Unmarshal([]byte(`{"type":"string", "minLength":10, "maxLength":20}`), &result)
+	if err := json.Unmarshal([]byte(`{"type":"string", "minLength":10, "maxLength":20}`), &result); err != nil {
+		panic(err)
+	}
 
 	return New(getTestUserService(), getTestKeyService(), Config{
 		Token:          "header:Authorization",
@@ -30,17 +32,23 @@ func getTestUserService() UserService {
 	mike := userService.New()
 	mike.SetUsername("michael@jackson.com")
 	mike.SetPassword("hee-hee")
-	userService.Save(mike, "Created")
+	if err := userService.Save(mike, "Created"); err != nil {
+		panic(err)
+	}
 
 	janet := userService.New()
 	janet.SetUsername("janet@jackson.com")
 	janet.SetPassword("nasty")
-	userService.Save(janet, "Created")
+	if err := userService.Save(janet, "Created"); err != nil {
+		panic(err)
+	}
 
 	andy := userService.New()
 	andy.SetUsername("andrew@jackson.com")
 	andy.SetPassword("whitehouse")
-	userService.Save(andy, "Created")
+	if err := userService.Save(andy, "Created"); err != nil {
+		panic(err)
+	}
 
 	return userService
 }

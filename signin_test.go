@@ -10,7 +10,7 @@ func TestPostSignin_Success(t *testing.T) {
 		Password: "whitehouse",
 	}
 
-	result := s.Signin(transaction)
+	result := s.SignIn(transaction)
 
 	require.Nil(t, result.Error)
 	require.Empty(t, result.ErrorMessage)
@@ -27,7 +27,7 @@ func TestPostSignin_Failure(t *testing.T) {
 		Password: "bad-password",
 	}
 
-	result := s.Signin(transaction)
+	result := s.SignIn(transaction)
 
 	require.NotNil(t, result.Error)
 	require.NotEmpty(t, result.ErrorMessage)
