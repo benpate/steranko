@@ -21,6 +21,9 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 		return derp.NewInternalError("steranko.Signin", "Invalid Request. Please try again later.")
 	}
 
+	// (short) random sleep to thwart timing attacks
+	sleepRandom(500, 1500)
+
 	// Try to authenticate the user
 	user := s.UserService.New()
 	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
@@ -79,27 +82,17 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 // CreateCertificate creates a new JWT token for the provided user.
 func (s *Steranko) CreateCertificate(request *http.Request, user User) (http.Cookie, error) {
 
-	// (short) random sleep to thwart timing attacks
-	sleepRandom(500, 1500)
-
 	// Set up a new JWT token
-	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims = user.Claims()
-
-	keyID, key := s.KeyService.NewJWTKey()
-	token.Header["kid"] = keyID
-
-	// Generate encoded token and send it as response.
-	signedString, err := token.SignedString(key)
+	token, err := s.CreateJWT(user.Claims())
 
 	if err != nil {
-		return http.Cookie{}, derp.Wrap(err, "steranko.PostSigninTransaction", "Error Signing JWT Token")
+		return http.Cookie{}, derp.Wrap(err, "steranko.CreateCertificate", "Error creating JWT token")
 	}
 
 	// Return the JWT certificate as a cookie
 	return http.Cookie{
 		Name:     cookieName(request),
-		Value:    signedString,            // Set the cookie's value
+		Value:    token,                   // Set the cookie's value
 		MaxAge:   63072000,                // Max-Age is 2 YEARS (60s * 60min * 24h * 365d * 2y)
 		Path:     "/",                     // This allows the cookie on all paths of this site.
 		Secure:   isTLS(request),          // Set secure cookies if we're on a secure connection
@@ -107,7 +100,28 @@ func (s *Steranko) CreateCertificate(request *http.Request, user User) (http.Coo
 		SameSite: http.SameSiteStrictMode, // Strict same-site policy prevents cookies from being used by other sites.
 		// NOTE: Domain is excluded because it is less restrictive than omitting it. [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies]
 	}, nil
+}
 
+// CreateJWT generates a new JWT token using the specified claims.
+func (s *Steranko) CreateJWT(claims jwt.Claims) (string, error) {
+
+	// Create a new JWT token with specified claims
+	token := jwt.New(jwt.SigningMethodHS256)
+	token.Claims = claims
+
+	// Get the signing key from the KeyService
+	keyID, key := s.KeyService.NewJWTKey()
+	token.Header["kid"] = keyID
+
+	// Try to generate encoded token
+	result, err := token.SignedString(key)
+
+	if err != nil {
+		return result, derp.Wrap(err, "steranko.CreateJWT", "Error Signing JWT Token")
+	}
+
+	// Return the encoded token
+	return result, nil
 }
 
 // ValidatePassword checks a password against the requirements in the Config structure.
