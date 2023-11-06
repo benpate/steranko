@@ -59,8 +59,7 @@ func (steranko *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Cla
 	claims := steranko.UserService.NewClaims()
 
 	// Parse it as a JWT token
-	// TODO: CRITICAL: Add WithValidateMthods() to this call.
-	token, err := jwt.ParseWithClaims(tokenString, claims, steranko.KeyService.FindJWTKey)
+	token, err := jwt.ParseWithClaims(tokenString, claims, steranko.KeyService.FindJWTKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 
 	if err != nil {
 		return nil, derp.Wrap(err, "steranko.Context.Claims", "Error parsing token")
