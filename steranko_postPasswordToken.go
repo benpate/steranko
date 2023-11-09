@@ -17,9 +17,9 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 		return derp.Wrap(err, "steranko.PostPasswordToken", "Error binding transaction parameters")
 	}
 
-	user := s.UserService.New()
+	user := s.userService.New()
 
-	if err := s.UserService.Load(txn.Username, user); err != nil {
+	if err := s.userService.Load(txn.Username, user); err != nil {
 
 		if derp.NotFound(err) {
 			return derp.NewUnauthorizedError("steranko.PostPasswordToken", "Unauthorized")
@@ -28,7 +28,7 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 		return derp.Wrap(err, "steranko.PostPasswordToken", "Error loading User account", txn.Username)
 	}
 
-	if err := s.UserService.RequestPasswordReset(user); err != nil {
+	if err := s.userService.RequestPasswordReset(user); err != nil {
 		return derp.Wrap(err, "steranko.PostPasswordToken", "Error sending reset invitation")
 	}
 

@@ -17,12 +17,13 @@ func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 	}
 
 	// try to authenticate the user with their old password
-	user := s.UserService.New()
+	user := s.userService.New()
 
 	if err := s.Authenticate(txn.Username, txn.OldPassword, user); err != nil {
 		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Cannot authenticate user", txn.Username)
 	}
 
+	// Validate that the password meets all system criteria
 	if err := s.ValidatePassword(txn.NewPassword); err != nil {
 		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Password does not meet requirements")
 	}
@@ -30,7 +31,7 @@ func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 	// try to update the user information with their new password
 	user.SetPassword(txn.NewPassword)
 
-	if err := s.UserService.Save(user, "Steranko: User Requested Password Update"); err != nil {
+	if err := s.userService.Save(user, "Steranko: User Requested Password Update"); err != nil {
 		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Error saving user record", user)
 	}
 

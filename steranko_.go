@@ -5,38 +5,38 @@ import (
 
 	"github.com/benpate/derp"
 	"github.com/benpate/rosetta/schema"
-	"github.com/benpate/steranko/plugin"
-	"github.com/benpate/steranko/plugin/hash"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // Steranko contains all required configuration information for this library.
 type Steranko struct {
-	UserService    UserService           // Service that provides CRUD operations on Users
-	KeyService     KeyService            // Service that generates/retrieves encryption keys used in JWT signatures.
-	Config         Config                // Configuration options for this library
-	PasswordHasher plugin.PasswordHasher // PasswordHasher uses a one-way encryption to obscure stored passwords.
-	PasswordRules  []plugin.PasswordRule // PasswordRules provide rules for enforcing password complexity
-
-	passwordSchema *schema.Schema
+	userService     UserService      // Service that provides CRUD operations on Users
+	keyService      KeyService       // Service that generates/retrieves encryption keys used in JWT signatures.
+	passwordSchema  schema.Schema    // Validating schema to use when setting new passwords.
+	passwordRules   []PasswordRule   // PasswordRules are additional validators that are applied to new passwords.
+	passwordHashers []PasswordHasher // PasswordHashers is a list of one-way encryption hashes that stored passwords.
 }
 
 // New returns a fully initialized Steranko instance, with HandlerFuncs that support all of your user authentication and authorization needs.
-func New(userService UserService, keyService KeyService, config Config) *Steranko {
+func New(userService UserService, keyService KeyService, options ...Option) *Steranko {
 
 	result := Steranko{
-		UserService: userService,
-		KeyService:  keyService,
-		Config:      config,
-
-		// PasswordHasher: hash.BCrypt(15),
-		PasswordHasher: hash.Plaintext{},
-		PasswordRules:  []plugin.PasswordRule{},
+		userService:     userService,
+		keyService:      keyService,
+		passwordHashers: []PasswordHasher{defaultPasswordHasher()}, // hash.Plaintext{},
+		passwordSchema:  schema.New(schema.String{MinLength: 8, Required: true}),
 	}
 
-	// Parse password rules from config file here
+	result.WithOptions(options...)
 
 	return &result
+}
+
+// WithOptios applies the provided Option functions to this Steranko instance.
+func (steranko *Steranko) WithOptions(options ...Option) {
+	for _, option := range options {
+		option(steranko)
+	}
 }
 
 // GetAuthorization retrieves the JWT token claims from the request.
@@ -56,10 +56,10 @@ func (steranko *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, e
 // GetAuthorizationFromToken parses a JWT token
 func (steranko *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, error) {
 
-	claims := steranko.UserService.NewClaims()
+	claims := steranko.userService.NewClaims()
 
 	// Parse it as a JWT token
-	token, err := jwt.ParseWithClaims(tokenString, claims, steranko.KeyService.FindJWTKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
+	token, err := jwt.ParseWithClaims(tokenString, claims, steranko.keyService.FindJWTKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 
 	if err != nil {
 		return nil, derp.Wrap(err, "steranko.Context.Claims", "Error parsing token")
@@ -78,10 +78,5 @@ func (steranko *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Cla
 
 // PasswordSchema returns the schema.Schema for validating passwords
 func (s *Steranko) PasswordSchema() *schema.Schema {
-
-	if s.passwordSchema == nil {
-		s.passwordSchema = &s.Config.PasswordSchema
-	}
-
-	return s.passwordSchema
+	return &s.passwordSchema
 }

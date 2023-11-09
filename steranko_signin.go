@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/benpate/derp"
+	"github.com/benpate/steranko/plugin/hash"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -25,7 +26,7 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 	sleepRandom(500, 1500)
 
 	// Try to authenticate the user
-	user := s.UserService.New()
+	user := s.userService.New()
 	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
 		return derp.NewForbiddenError("steranko.Signin", "Invalid username/password.  Please try again.")
@@ -47,7 +48,7 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 func (s *Steranko) Authenticate(username string, password string, user User) error {
 
 	// Try to load the User from the UserService
-	if err := s.UserService.Load(username, user); err != nil {
+	if err := s.userService.Load(username, user); err != nil {
 
 		if derp.NotFound(err) {
 			return derp.NewUnauthorizedError("steranko.Authenticate", "Unauthorized", username, "user not found")
@@ -56,10 +57,8 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 		return derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username, "database error")
 	}
 
-	// Fall through means that we have a matching user account.
-
-	// Try to authenticate the password
-	ok, update := s.PasswordHasher.CompareHashedPassword(password, user.GetPassword())
+	// If we're here, then we have a matching user account. So, try to authenticate the password
+	ok, update := s.ComparePassword(password, user.GetPassword())
 
 	if !ok {
 		return derp.NewUnauthorizedError("steranko.Authenticate", "Unauthorized", username, "invalid password")
@@ -67,9 +66,9 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 
 	if update {
 
-		if hashedValue, err := s.PasswordHasher.HashPassword(password); err == nil {
+		if hashedValue, err := s.PrimaryPasswordHasher().HashPassword(password); err == nil {
 			user.SetPassword(hashedValue)
-			_ = s.UserService.Save(user, "Password automatically upgraded by Steranko")
+			_ = s.userService.Save(user, "Password automatically upgraded by Steranko")
 			// Intentionally ignoring errors updating the password because the user has already
 			// authenticated.  If we can't update it now (for some reason) then we'll get it soon.
 		}
@@ -77,6 +76,37 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 
 	// Success
 	return nil
+}
+
+func (s *Steranko) PrimaryPasswordHasher() PasswordHasher {
+	if len(s.passwordHashers) > 0 {
+		return s.passwordHashers[0]
+	}
+
+	return defaultPasswordHasher()
+}
+
+// ComparePassword uses each
+func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (bool, bool) {
+
+	// Try each hashing algorithm in order.
+	for index, passwordHasher := range s.passwordHashers {
+
+		// If the password matches, then return success.
+		if ok, update := passwordHasher.CompareHashedPassword(hashedValue, plaintext); ok {
+
+			// If we're using a deprecated hashing algorithm, then MUST update
+			if index > 0 {
+				update = true
+			}
+
+			// Yay!
+			return ok, update
+		}
+	}
+
+	// Boo!
+	return false, false
 }
 
 // CreateCertificate creates a new JWT token for the provided user.
@@ -105,31 +135,48 @@ func (s *Steranko) CreateCertificate(request *http.Request, user User) (http.Coo
 // CreateJWT generates a new JWT token using the specified claims.
 func (s *Steranko) CreateJWT(claims jwt.Claims) (string, error) {
 
+	const location = "steranko.CreateJWT"
+
 	// Create a new JWT token with specified claims
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims = claims
 
 	// Get the signing key from the KeyService
-	keyID, key := s.KeyService.NewJWTKey()
+	keyID, key := s.keyService.NewJWTKey()
 	token.Header["kid"] = keyID
 
 	// Try to generate encoded token
 	result, err := token.SignedString(key)
 
 	if err != nil {
-		return result, derp.Wrap(err, "steranko.CreateJWT", "Error Signing JWT Token")
+		return result, derp.Wrap(err, location, "Error Signing JWT Token")
 	}
 
 	// Return the encoded token
 	return result, nil
 }
 
-// ValidatePassword checks a password against the requirements in the Config structure.
-func (s *Steranko) ValidatePassword(password string) error {
+// ValidatePassword checks a password against all system requirements
+func (s *Steranko) ValidatePassword(plaintext string) error {
 
-	if err := s.PasswordSchema().Validate(password); err != nil {
-		return derp.Wrap(err, "steranko.ValidatePassword", "Password does not meet requirements")
+	const location = "steranko.ValidatePassword"
+
+	// Validate the schema (size, composition, etc)
+	if err := s.PasswordSchema().Validate(plaintext); err != nil {
+		return derp.Wrap(err, location, "Password does not meet requirements")
 	}
 
+	// Validate other password rules (complex functions, external services)
+	for _, rule := range s.passwordRules {
+		if ok, message := rule.ValidatePassword(plaintext); !ok {
+			return derp.NewBadRequestError(location, message)
+		}
+	}
+
+	// Everything is OK!
 	return nil
+}
+
+func defaultPasswordHasher() PasswordHasher {
+	return hash.BCrypt(15)
 }

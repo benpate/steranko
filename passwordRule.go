@@ -1,4 +1,4 @@
-package plugin
+package steranko
 
 // PasswordRule is used to verify if a password meets the password complexity criteria for this system.
 type PasswordRule interface {

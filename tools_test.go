@@ -10,11 +10,11 @@ import (
 
 func TestAuthenticate(t *testing.T) {
 
-	s := New(getTestUserService(), getTestKeyService(), Config{})
+	s := getTestSteranko()
 
 	{
 		// Test successful signin
-		user := s.UserService.New()
+		user := s.userService.New()
 		err := s.Authenticate("michael@jackson.com", "hee-hee", user)
 		require.Nil(t, err)
 		require.NotNil(t, user)
@@ -24,7 +24,7 @@ func TestAuthenticate(t *testing.T) {
 
 	{
 		// Test bad password
-		user := s.UserService.New()
+		user := s.userService.New()
 		err := s.Authenticate("michael@jackson.com", "hoo-hoo", user)
 		require.NotNil(t, err)
 		require.Equal(t, "michael@jackson.com", user.GetUsername())
@@ -33,7 +33,7 @@ func TestAuthenticate(t *testing.T) {
 
 	{
 		// Test missing user
-		user := s.UserService.New()
+		user := s.userService.New()
 		err := s.Authenticate("kendall@jackson.com", "chardonay", user)
 		require.NotNil(t, err)
 		require.Equal(t, "", user.GetUsername())
@@ -57,10 +57,7 @@ func TestPasswordSchema(t *testing.T) {
 	err := json.Unmarshal([]byte(`{"type":"string", "minLength":0, "maxLength":20}`), &input)
 	require.Nil(t, err)
 
-	s := New(getTestUserService(), getTestKeyService(), Config{
-		PasswordSchema: input,
-	})
-
+	s := New(getTestUserService(), getTestKeyService(), WithPasswordSchema(input))
 	sch := s.PasswordSchema()
 
 	require.NotNil(t, sch)

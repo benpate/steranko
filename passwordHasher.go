@@ -1,4 +1,4 @@
-package plugin
+package steranko
 
 // PasswordHasher handles all encryption functions for passwords.
 type PasswordHasher interface {

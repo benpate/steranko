@@ -39,7 +39,6 @@ func (bc BCrypt) CompareHashedPassword(hashedValue string, plaintext string) (OK
 
 	// Try to validate the password.  If it cannot be matched, then return failure.
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedValue), []byte(plaintext)); err != nil {
-
 		// FALSE, FALSE means that the password is not OK.
 		return false, false
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/benpate/data"
 	mockdb "github.com/benpate/data-mock"
 	"github.com/benpate/rosetta/schema"
+	"github.com/benpate/steranko/plugin/hash"
 )
 
 func getTestSteranko() *Steranko {
@@ -17,10 +18,12 @@ func getTestSteranko() *Steranko {
 		panic(err)
 	}
 
-	return New(getTestUserService(), getTestKeyService(), Config{
-		Token:          "header:Authorization",
-		PasswordSchema: result,
-	})
+	return New(
+		getTestUserService(),
+		getTestKeyService(),
+		WithPasswordSchema(result),
+		WithPasswordHasher(hash.Plaintext{}),
+	)
 }
 
 func getTestUserService() UserService {
