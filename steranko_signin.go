@@ -15,11 +15,13 @@ import (
 // it automatically sets the "Authorization" cookie in the user's browser.
 func (s *Steranko) SignIn(ctx echo.Context) error {
 
+	const location = "steranko.Signin"
+
 	var txn SigninTransaction
 
 	// Collect values from the request body
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.NewInternalError("steranko.Signin", "Invalid Request. Please try again later.")
+		return derp.Wrap(err, location, "Unable to bind request body", derp.WithCode(http.StatusBadRequest))
 	}
 
 	// (short) random sleep to thwart timing attacks
@@ -29,14 +31,14 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 	user := s.userService.New()
 	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
-		return derp.NewForbiddenError("steranko.Signin", "Invalid username/password.  Please try again.")
+		return derp.NewForbiddenError(location, "Invalid username/password.")
 	}
 
 	// Try to create a JWT token
 	certificate, err := s.CreateCertificate(ctx.Request(), user)
 
 	if err != nil {
-		return derp.Wrap(err, "steranko.Signin", "Error creating JWT certificate")
+		return derp.Wrap(err, location, "Error creating JWT certificate")
 	}
 
 	// Set the cookie in the user's browser and exit
