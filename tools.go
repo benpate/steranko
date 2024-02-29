@@ -9,7 +9,6 @@ import (
 // sleepRandom sleeps for a random amount of time between the
 // minimum and maximum values
 func sleepRandom(min int, max int) {
-	rand.Seed(time.Now().UnixNano())
 	sleepTime := rand.Intn(max-min+1) + min
 	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 }
