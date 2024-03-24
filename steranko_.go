@@ -33,14 +33,14 @@ func New(userService UserService, keyService KeyService, options ...Option) *Ste
 }
 
 // WithOptios applies the provided Option functions to this Steranko instance.
-func (steranko *Steranko) WithOptions(options ...Option) {
+func (s *Steranko) WithOptions(options ...Option) {
 	for _, option := range options {
-		option(steranko)
+		option(s)
 	}
 }
 
 // GetAuthorization retrieves the JWT token claims from the request.
-func (steranko *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
+func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 
 	// Retrieve the cookie value from the context
 	cookieName := cookieName(request)
@@ -50,16 +50,16 @@ func (steranko *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, e
 		return nil, derp.Wrap(err, "steranko.Context.Claims", "Invalid cookie")
 	}
 
-	return steranko.GetAuthorizationFromToken(cookie.Value)
+	return s.GetAuthorizationFromToken(cookie.Value)
 }
 
 // GetAuthorizationFromToken parses a JWT token
-func (steranko *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, error) {
+func (s *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, error) {
 
-	claims := steranko.userService.NewClaims()
+	claims := s.userService.NewClaims()
 
 	// Parse it as a JWT token
-	token, err := jwt.ParseWithClaims(tokenString, claims, steranko.keyService.FindJWTKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
+	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindJWTKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 
 	if err != nil {
 		return nil, derp.Wrap(err, "steranko.Context.Claims", "Error parsing token")
@@ -70,6 +70,19 @@ func (steranko *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Cla
 	}
 
 	return claims, nil
+}
+
+func (s *Steranko) SetPassword(user User, plaintext string) error {
+
+	hashedValue, err := s.PrimaryPasswordHasher().HashPassword(plaintext)
+
+	if err != nil {
+		return derp.Wrap(err, "steranko.SetPassword", "Error hashing password")
+	}
+
+	user.SetPassword(hashedValue)
+	return nil
+
 }
 
 /******************************************

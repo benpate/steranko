@@ -67,12 +67,11 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 	}
 
 	if update {
-
-		if hashedValue, err := s.PrimaryPasswordHasher().HashPassword(password); err == nil {
-			user.SetPassword(hashedValue)
-			_ = s.userService.Save(user, "Password automatically upgraded by Steranko")
-			// Intentionally ignoring errors updating the password because the user has already
-			// authenticated.  If we can't update it now (for some reason) then we'll get it soon.
+		// Intentionally ignoring errors updating the password because the user has already
+		// authenticated.  If we can't update it now (for some reason) then we'll get it soon.
+		if err := s.SetPassword(user, password); err == nil {
+			// nolint:errcheck
+			s.userService.Save(user, "Password automatically upgraded by Steranko")
 		}
 	}
 
