@@ -47,7 +47,7 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 	cookie, err := request.Cookie(cookieName)
 
 	if err != nil {
-		return nil, derp.Wrap(err, "steranko.Context.Claims", "Invalid cookie")
+		return nil, derp.Wrap(err, "", "Invalid cookie")
 	}
 
 	return s.GetAuthorizationFromToken(cookie.Value)
@@ -56,17 +56,19 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 // GetAuthorizationFromToken parses a JWT token
 func (s *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, error) {
 
+	const location = "steranko.Context.GetAuthorizationFromToken"
+
 	claims := s.userService.NewClaims()
 
 	// Parse it as a JWT token
 	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindJWTKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 
 	if err != nil {
-		return nil, derp.Wrap(err, "steranko.Context.Claims", "Error parsing token")
+		return nil, derp.Wrap(err, location, "Error parsing token")
 	}
 
 	if !token.Valid {
-		return nil, derp.NewForbiddenError("steranko.Context.Claims", "Invalid token")
+		return nil, derp.NewForbiddenError(location, "Token is invalid")
 	}
 
 	return claims, nil

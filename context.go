@@ -26,7 +26,7 @@ func (ctx *Context) Authorization() (jwt.Claims, error) {
 	claims, err := ctx.steranko.GetAuthorization(ctx.Request())
 
 	if err != nil {
-		return nil, derp.Wrap(err, "steranko.Context.Claims", "Error parsing token")
+		return nil, derp.Wrap(err, "steranko.Context.Authorization", "Error parsing token")
 	}
 
 	// Save the claims in the context (for next time, maybe) and return
