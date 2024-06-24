@@ -13,10 +13,10 @@ func sleepRandom(min int, max int) {
 	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 }
 
-// cookieName returns the cookie name to use for a given request.
+// CookieName returns the cookie name to use for a given request.
 // SSL requests use __Host-Authorization, which locks the cookie to this domain
 // Non-SSL requests use Authorization, which is not locked to a domain
-func cookieName(request *http.Request) string {
+func CookieName(request *http.Request) string {
 
 	// If this is a secure domain...
 	if isTLS(request) {
@@ -30,4 +30,18 @@ func cookieName(request *http.Request) string {
 // isTLS returns TRUE if the given http.Request uses an SSL connection
 func isTLS(request *http.Request) bool {
 	return request.TLS != nil
+}
+
+func copyCookie(original *http.Cookie) http.Cookie {
+	return http.Cookie{
+		Name:     original.Name,
+		Value:    original.Value,
+		MaxAge:   original.MaxAge,
+		Expires:  original.Expires,
+		Domain:   original.Domain,
+		Path:     original.Path,
+		HttpOnly: original.HttpOnly,
+		Secure:   original.Secure,
+		SameSite: original.SameSite,
+	}
 }

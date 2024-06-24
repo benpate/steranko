@@ -122,7 +122,7 @@ func (s *Steranko) CreateCertificate(request *http.Request, user User) (http.Coo
 
 	// Return the JWT certificate as a cookie
 	return http.Cookie{
-		Name:     cookieName(request),
+		Name:     CookieName(request),
 		Value:    token,                // Set the cookie's value
 		MaxAge:   63072000,             // Max-Age is 2 YEARS (60s * 60min * 24h * 365d * 2y)
 		Path:     "/",                  // This allows the cookie on all paths of this site.
@@ -176,6 +176,19 @@ func (s *Steranko) ValidatePassword(plaintext string) error {
 
 	// Everything is OK!
 	return nil
+}
+
+// PushCookie sets a new cookie to the user's context, and moves their
+// existing cookie to be the "-backup" cookie.
+func (s *Steranko) PushCookie(ctx echo.Context, cookie http.Cookie) {
+
+	if originalCookie, err := ctx.Cookie(cookie.Name); err == nil {
+		backupCookie := copyCookie(originalCookie)
+		backupCookie.Name += "-backup"
+		ctx.SetCookie(&backupCookie)
+	}
+
+	ctx.SetCookie(&cookie)
 }
 
 func defaultPasswordHasher() PasswordHasher {

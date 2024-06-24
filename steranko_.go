@@ -42,12 +42,14 @@ func (s *Steranko) WithOptions(options ...Option) {
 // GetAuthorization retrieves the JWT token claims from the request.
 func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 
+	const location = "steranko.GetAuthorization"
+
 	// Retrieve the cookie value from the context
-	cookieName := cookieName(request)
+	cookieName := CookieName(request)
 	cookie, err := request.Cookie(cookieName)
 
 	if err != nil {
-		return nil, derp.Wrap(err, "", "Invalid cookie")
+		return nil, derp.Wrap(err, location, "Invalid cookie")
 	}
 
 	return s.GetAuthorizationFromToken(cookie.Value)
