@@ -5,6 +5,6 @@ import (
 )
 
 type KeyService interface {
-	NewJWTKey() (string, any)
+	NewJWTKey() (string, any, error)
 	FindJWTKey(*jwt.Token) (any, error)
 }
