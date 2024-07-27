@@ -11,6 +11,7 @@ require (
 	github.com/benpate/rosetta v0.21.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.24.0
 )
