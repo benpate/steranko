@@ -143,7 +143,7 @@ func (s *Steranko) CreateJWT(claims jwt.Claims) (string, error) {
 	token.Claims = claims
 
 	// Get the signing key from the KeyService
-	keyID, key, err := s.keyService.NewJWTKey()
+	keyID, key, err := s.keyService.GetCurrentKey()
 
 	if err != nil {
 		return "", derp.Wrap(err, location, "Error getting JWT Key")

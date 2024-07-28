@@ -6,7 +6,6 @@ import (
 	"github.com/benpate/derp"
 	"github.com/benpate/rosetta/schema"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rs/zerolog/log"
 )
 
 // Steranko contains all required configuration information for this library.
@@ -61,12 +60,10 @@ func (s *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, er
 
 	const location = "steranko.Context.GetAuthorizationFromToken"
 
-	log.Trace().Msg("steranko.GetAuthorizationFromToken")
-
 	claims := s.userService.NewClaims()
 
 	// Parse it as a JWT token
-	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindJWTKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
+	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 
 	if err != nil {
 		return nil, derp.ReportAndReturn(derp.Wrap(err, location, "Error parsing token"))
