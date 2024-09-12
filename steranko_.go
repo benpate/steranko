@@ -66,11 +66,11 @@ func (s *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, er
 	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
 
 	if err != nil {
-		return nil, derp.ReportAndReturn(derp.Wrap(err, location, "Error parsing token"))
+		return nil, derp.Wrap(err, location, "Error parsing token")
 	}
 
 	if !token.Valid {
-		return nil, derp.ReportAndReturn(derp.NewForbiddenError(location, "Token is invalid", tokenString, token))
+		return nil, derp.NewForbiddenError(location, "Token is invalid", tokenString, token)
 	}
 
 	return claims, nil
