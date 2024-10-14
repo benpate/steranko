@@ -24,7 +24,7 @@ func (bc BCrypt) HashPassword(plaintext string) (hashedValue string, error error
 	result, err := bcrypt.GenerateFromPassword([]byte(plaintext), int(bc))
 
 	if err != nil {
-		return "", derp.NewInternalError("steranko.plugin.hash.HashPassword", "Error hashing plaintext", err.Error())
+		return "", derp.Wrap(err, "steranko.plugin.hash.HashPassword", "Error hashing plaintext", derp.WithInternalError())
 	}
 
 	return string(result), nil
@@ -48,7 +48,7 @@ func (bc BCrypt) CompareHashedPassword(hashedValue string, plaintext string) (OK
 
 	if err != nil {
 		// Silently report this error because we don't want to interrupt the application flow.
-		derp.Report(derp.NewInternalError("steranko.plugin.hash.CompareHashedPassword", "Error generating password cost", err.Error()))
+		derp.Report(derp.Wrap(err, "steranko.plugin.hash.CompareHashedPassword", "Error generating password cost", derp.WithInternalError()))
 	}
 
 	if cost < int(bc) {
