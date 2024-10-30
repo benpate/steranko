@@ -9,8 +9,8 @@ require (
 	github.com/benpate/data-mock v0.28.12
 	github.com/benpate/derp v0.31.0
 	github.com/benpate/exp v0.8.3
-	github.com/benpate/remote v0.16.6
-	github.com/benpate/rosetta v0.22.2
+	github.com/benpate/remote v0.16.8
+	github.com/benpate/rosetta v0.23.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/stretchr/testify v1.9.0
@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/benpate/turbine v0.1.1 // indirect
+	github.com/benpate/turbine v0.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
