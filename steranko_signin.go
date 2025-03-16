@@ -13,7 +13,7 @@ import (
 // in your REST API, or can be wrapped by your own custom function if
 // you want to extend its functionality.  If the signin is successful
 // it automatically sets the "Authorization" cookie in the user's browser.
-func (s *Steranko) SignIn(ctx echo.Context) error {
+func (s *Steranko) SignIn(ctx echo.Context) (User, error) {
 
 	const location = "steranko.Signin"
 
@@ -21,7 +21,7 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 
 	// Collect values from the request body
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Wrap(err, location, "Unable to bind request body", derp.WithCode(http.StatusBadRequest))
+		return nil, derp.Wrap(err, location, "Unable to bind request body", derp.WithCode(http.StatusBadRequest))
 	}
 
 	// (short) random sleep to thwart timing attacks
@@ -31,19 +31,19 @@ func (s *Steranko) SignIn(ctx echo.Context) error {
 	user := s.userService.New()
 	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
-		return derp.NewForbiddenError(location, "Invalid username/password.")
+		return nil, derp.NewForbiddenError(location, "Invalid username/password.")
 	}
 
 	// Try to create a JWT token
 	certificate, err := s.CreateCertificate(ctx.Request(), user)
 
 	if err != nil {
-		return derp.Wrap(err, location, "Error creating JWT certificate")
+		return nil, derp.Wrap(err, location, "Error creating JWT certificate")
 	}
 
 	// Set the cookie in the user's browser and exit
 	ctx.SetCookie(&certificate)
-	return nil
+	return user, nil
 }
 
 // Authenticate verifies a username/password combination.
