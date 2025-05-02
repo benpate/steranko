@@ -120,17 +120,22 @@ func (s *Steranko) CreateCertificate(request *http.Request, user User) (http.Coo
 		return http.Cookie{}, derp.Wrap(err, "steranko.CreateCertificate", "Error creating JWT token")
 	}
 
+	return s.CreateCookie(CookieName(request), token, isTLS(request)), nil
+}
+
+func (s *Steranko) CreateCookie(name string, value string, isTLS bool) http.Cookie {
+
 	// Return the JWT certificate as a cookie
 	return http.Cookie{
-		Name:     CookieName(request),
-		Value:    token,                // Set the cookie's value
+		Name:     name,
+		Value:    value,                // Set the cookie's value
 		MaxAge:   63072000,             // Max-Age is 2 YEARS (60s * 60min * 24h * 365d * 2y)
 		Path:     "/",                  // This allows the cookie on all paths of this site.
-		Secure:   isTLS(request),       // Set secure cookies if we're on a secure connection
+		Secure:   isTLS,                // Set secure cookies if we're on a secure connection
 		HttpOnly: true,                 // Cookies should only be accessible via HTTPS (not client-side scripts)
 		SameSite: http.SameSiteLaxMode, // "Lax" same-site policy allows cookies on GET requests, but prevents cookies from being used by other sites on POST requests.
 		// NOTE: Domain is excluded because it is less restrictive than omitting it. [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies]
-	}, nil
+	}
 }
 
 // CreateJWT generates a new JWT token using the specified claims.
