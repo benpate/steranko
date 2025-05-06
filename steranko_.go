@@ -70,7 +70,7 @@ func (s *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, er
 	}
 
 	if !token.Valid {
-		return nil, derp.NewForbiddenError(location, "Token is invalid", tokenString, token)
+		return nil, derp.ForbiddenError(location, "Token is invalid", tokenString, token)
 	}
 
 	return claims, nil

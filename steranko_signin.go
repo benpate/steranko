@@ -31,7 +31,7 @@ func (s *Steranko) SignIn(ctx echo.Context) (User, error) {
 	user := s.userService.New()
 	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
-		return nil, derp.NewForbiddenError(location, "Invalid username/password.")
+		return nil, derp.ForbiddenError(location, "Invalid username/password.")
 	}
 
 	// Try to create a JWT token
@@ -52,8 +52,8 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 	// Try to load the User from the UserService
 	if err := s.userService.Load(username, user); err != nil {
 
-		if derp.NotFound(err) {
-			return derp.NewUnauthorizedError("steranko.Authenticate", "Unauthorized", username, "user not found")
+		if derp.IsNotFound(err) {
+			return derp.UnauthorizedError("steranko.Authenticate", "Unauthorized", username, "user not found")
 		}
 
 		return derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username, "database error")
@@ -63,7 +63,7 @@ func (s *Steranko) Authenticate(username string, password string, user User) err
 	ok, update := s.ComparePassword(password, user.GetPassword())
 
 	if !ok {
-		return derp.NewUnauthorizedError("steranko.Authenticate", "Unauthorized", username, "invalid password")
+		return derp.UnauthorizedError("steranko.Authenticate", "Unauthorized", username, "invalid password")
 	}
 
 	if update {
@@ -180,7 +180,7 @@ func (s *Steranko) ValidatePassword(plaintext string) error {
 	// Validate other password rules (complex functions, external services)
 	for _, rule := range s.passwordRules {
 		if ok, message := rule.ValidatePassword(plaintext); !ok {
-			return derp.NewBadRequestError(location, message)
+			return derp.BadRequestError(location, message)
 		}
 	}
 
