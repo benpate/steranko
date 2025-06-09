@@ -123,6 +123,26 @@ func (s *Steranko) CreateCertificate(request *http.Request, user User) (http.Coo
 	return s.CreateCookie(CookieName(request), token, isTLS(request)), nil
 }
 
+// CreateCertificate creates a new JWT token for the provided user.
+func (s *Steranko) SetCookieFromClaims(ctx echo.Context, claims jwt.Claims) error {
+
+	const location = "steranko.SetCookieFromClaims"
+
+	// Create the JWT Token
+	token, err := s.CreateJWT(claims)
+
+	if err != nil {
+		return derp.Wrap(err, location, "Error creating JWT")
+	}
+
+	// Set the Cookie in the Response
+	cookieName := CookieName(ctx.Request())
+	cookie := s.CreateCookie(cookieName, token, isTLS(ctx.Request()))
+	s.PushCookie(ctx, cookie)
+
+	return nil
+}
+
 func (s *Steranko) CreateCookie(name string, value string, isTLS bool) http.Cookie {
 
 	// Return the JWT certificate as a cookie
