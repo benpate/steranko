@@ -49,29 +49,33 @@ func (s *Steranko) SignIn(ctx echo.Context) (User, error) {
 // Authenticate verifies a username/password combination.
 func (s *Steranko) Authenticate(username string, password string, user User) error {
 
+	const location = "steranko.Authenticate"
+
 	// Try to load the User from the UserService
 	if err := s.userService.Load(username, user); err != nil {
 
 		if derp.IsNotFound(err) {
-			return derp.UnauthorizedError("steranko.Authenticate", "Unauthorized", username, "user not found")
+			return derp.UnauthorizedError(location, "Unauthorized", username, "user not found")
 		}
 
-		return derp.Wrap(err, "steranko.Authenticate", "Error loading User account", username, "database error")
+		return derp.Wrap(err, location, "Error loading User account", username, "database error")
 	}
 
 	// If we're here, then we have a matching user account. So, try to authenticate the password
 	ok, update := s.ComparePassword(password, user.GetPassword())
 
 	if !ok {
-		return derp.UnauthorizedError("steranko.Authenticate", "Unauthorized", username, "invalid password")
+		return derp.UnauthorizedError(location, "Unauthorized", username, "invalid password")
 	}
 
 	if update {
 		// Intentionally ignoring errors updating the password because the user has already
 		// authenticated.  If we can't update it now (for some reason) then we'll get it soon.
 		if err := s.SetPassword(user, password); err == nil {
-			// nolint:errcheck
-			s.userService.Save(user, "Password automatically upgraded by Steranko")
+
+			if err := s.userService.Save(user, "Password automatically upgraded by Steranko"); err != nil {
+				derp.Report(derp.Wrap(err, location, "Error saving User account after password upgrade", user.GetUsername()))
+			}
 		}
 	}
 
