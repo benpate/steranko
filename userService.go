@@ -23,8 +23,11 @@ type UserService interface {
 	// delivering a password reset message to the user.
 	RequestPasswordReset(user User) error
 
-	// NewClaims generates an empty object that meets the jwt.Claims any
+	// NewClaims generates an empty jwt.Claims object.
 	NewClaims() jwt.Claims
+
+	// Claims generates a jwt.Claims object for the given user.
+	Claims(user User) (jwt.Claims, error)
 
 	// Close cleans up any connections opened by the service.
 	Close()

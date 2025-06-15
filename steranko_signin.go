@@ -4,16 +4,15 @@ import (
 	"net/http"
 
 	"github.com/benpate/derp"
-	"github.com/benpate/steranko/plugin/hash"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
-// SignIn implements the echo.HandlerFunc, and can be used directly
-// in your REST API, or can be wrapped by your own custom function if
-// you want to extend its functionality.  If the signin is successful
+// SigninFormPost reads the data from a form post and signs in the user
+// using their username/password. If the signin is successful
 // it automatically sets the "Authorization" cookie in the user's browser.
-func (s *Steranko) SignIn(ctx echo.Context) (User, error) {
+// If unsuccessful, an error is returned to the caller.
+func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 
 	const location = "steranko.Signin"
 
@@ -29,106 +28,43 @@ func (s *Steranko) SignIn(ctx echo.Context) (User, error) {
 
 	// Try to authenticate the user
 	user := s.userService.New()
-	if err := s.Authenticate(txn.Username, txn.Password, user); err != nil {
+	if err := s.authenticate(txn.Username, txn.Password, user); err != nil {
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
 		return nil, derp.ForbiddenError(location, "Invalid username/password.")
 	}
 
-	// Try to create a JWT token
-	certificate, err := s.CreateCertificate(ctx.Request(), user)
-
-	if err != nil {
-		return nil, derp.Wrap(err, location, "Error creating JWT certificate")
+	// Try to Sign the User into the server
+	if err := s.SigninUser(ctx, user); err != nil {
+		return nil, derp.Wrap(err, location, "Error signing in user", user.GetUsername())
 	}
 
-	// Set the cookie in the user's browser and exit
-	ctx.SetCookie(&certificate)
+	// Success!
 	return user, nil
 }
 
-// Authenticate verifies a username/password combination.
-func (s *Steranko) Authenticate(username string, password string, user User) error {
+// SigninUser writes a cookie to the User's browser that signs them into the server.
+func (s *Steranko) SigninUser(ctx echo.Context, user User) error {
 
-	const location = "steranko.Authenticate"
+	const location = "steranko.SigninUser"
 
-	// Try to load the User from the UserService
-	if err := s.userService.Load(username, user); err != nil {
+	// Create a new JWT claims object for the user
+	claims, err := s.userService.Claims(user)
 
-		if derp.IsNotFound(err) {
-			return derp.UnauthorizedError(location, "Unauthorized", username, "user not found")
-		}
-
-		return derp.Wrap(err, location, "Error loading User account", username, "database error")
+	if err != nil {
+		return derp.Wrap(err, location, "Error generating JSON Web Token claims")
 	}
 
-	// If we're here, then we have a matching user account. So, try to authenticate the password
-	ok, update := s.ComparePassword(password, user.GetPassword())
-
-	if !ok {
-		return derp.UnauthorizedError(location, "Unauthorized", username, "invalid password")
+	// Set the claims as a cookie in the User's browser
+	if err := s.SetCookie(ctx, claims); err != nil {
+		return derp.Wrap(err, location, "Error setting signin cookie")
 	}
 
-	if update {
-		// Intentionally ignoring errors updating the password because the user has already
-		// authenticated.  If we can't update it now (for some reason) then we'll get it soon.
-		if err := s.SetPassword(user, password); err == nil {
-
-			if err := s.userService.Save(user, "Password automatically upgraded by Steranko"); err != nil {
-				derp.Report(derp.Wrap(err, location, "Error saving User account after password upgrade", user.GetUsername()))
-			}
-		}
-	}
-
-	// Success
+	// Success.
 	return nil
 }
 
-func (s *Steranko) PrimaryPasswordHasher() PasswordHasher {
-	if len(s.passwordHashers) > 0 {
-		return s.passwordHashers[0]
-	}
-
-	return defaultPasswordHasher()
-}
-
-// ComparePassword uses each
-func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (bool, bool) {
-
-	// Try each hashing algorithm in order.
-	for index, passwordHasher := range s.passwordHashers {
-
-		// If the password matches, then return success.
-		if ok, update := passwordHasher.CompareHashedPassword(hashedValue, plaintext); ok {
-
-			// If we're using a deprecated hashing algorithm, then MUST update
-			if index > 0 {
-				update = true
-			}
-
-			// Yay!
-			return ok, update
-		}
-	}
-
-	// Boo!
-	return false, false
-}
-
-// CreateCertificate creates a new JWT token for the provided user.
-func (s *Steranko) CreateCertificate(request *http.Request, user User) (http.Cookie, error) {
-
-	// Set up a new JWT token
-	token, err := s.CreateJWT(user.Claims())
-
-	if err != nil {
-		return http.Cookie{}, derp.Wrap(err, "steranko.CreateCertificate", "Error creating JWT token")
-	}
-
-	return s.CreateCookie(CookieName(request), token, isTLS(request)), nil
-}
-
-// CreateCertificate creates a new JWT token for the provided user.
-func (s *Steranko) SetCookieFromClaims(ctx echo.Context, claims jwt.Claims) error {
+// SetCookie writes a Cookie / JWT token to the User's browser using the provided claims.
+func (s *Steranko) SetCookie(ctx echo.Context, claims jwt.Claims) error {
 
 	const location = "steranko.SetCookieFromClaims"
 
@@ -136,46 +72,48 @@ func (s *Steranko) SetCookieFromClaims(ctx echo.Context, claims jwt.Claims) erro
 	token, err := s.CreateJWT(claims)
 
 	if err != nil {
-		return derp.Wrap(err, location, "Error creating JWT")
+		return derp.Wrap(err, location, "Error creating JSON Web Token")
 	}
 
 	// Set the Cookie in the Response
-	cookieName := CookieName(ctx.Request())
-	cookie := s.CreateCookie(cookieName, token, isTLS(ctx.Request()))
-	s.PushCookie(ctx, cookie)
-
-	return nil
-}
-
-func (s *Steranko) CreateCookie(name string, value string, isTLS bool) http.Cookie {
+	request := ctx.Request()
+	name := cookieName(request)
+	secure := isTLS(request)
 
 	// Return the JWT certificate as a cookie
-	return http.Cookie{
+	cookie := http.Cookie{
 		Name:     name,
-		Value:    value,                // Set the cookie's value
-		MaxAge:   63072000,             // Max-Age is 2 YEARS (60s * 60min * 24h * 365d * 2y)
+		Value:    token,                // Set the cookie's value
+		MaxAge:   2592000,              // Max-Age is 30 DAYS (60s * 60min * 24h * 30d)
 		Path:     "/",                  // This allows the cookie on all paths of this site.
-		Secure:   isTLS,                // Set secure cookies if we're on a secure connection
+		Secure:   secure,               // Set secure cookies if we're on a secure connection
 		HttpOnly: true,                 // Cookies should only be accessible via HTTPS (not client-side scripts)
 		SameSite: http.SameSiteLaxMode, // "Lax" same-site policy allows cookies on GET requests, but prevents cookies from being used by other sites on POST requests.
 		// NOTE: Domain is excluded because it is less restrictive than omitting it. [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies]
 	}
+
+	// Send the Cookie to the User's browser
+	pushCookie(ctx, cookie)
+
+	return nil
 }
 
 // CreateJWT generates a new JWT token using the specified claims.
+// Sternako writes this JWT token using the HS512 signing method, and
+// the signing key that is generated by the embedded KeyService.
 func (s *Steranko) CreateJWT(claims jwt.Claims) (string, error) {
 
 	const location = "steranko.CreateJWT"
 
 	// Create a new JWT token with specified claims
-	token := jwt.New(jwt.SigningMethodHS256)
+	token := jwt.New(jwt.SigningMethodHS512)
 	token.Claims = claims
 
 	// Get the signing key from the KeyService
 	keyID, key, err := s.keyService.GetCurrentKey()
 
 	if err != nil {
-		return "", derp.Wrap(err, location, "Error getting JWT Key")
+		return "", derp.Wrap(err, location, "Error getting key from JSON Web Token")
 	}
 
 	token.Header["kid"] = keyID
@@ -184,7 +122,7 @@ func (s *Steranko) CreateJWT(claims jwt.Claims) (string, error) {
 	result, err := token.SignedString(key)
 
 	if err != nil {
-		return result, derp.Wrap(err, location, "Error Signing JWT Token")
+		return result, derp.Wrap(err, location, "Error signing JSON Web Token")
 	}
 
 	// Return the encoded token
@@ -197,7 +135,7 @@ func (s *Steranko) ValidatePassword(plaintext string) error {
 	const location = "steranko.ValidatePassword"
 
 	// Validate the schema (size, composition, etc)
-	if err := s.PasswordSchema().Validate(plaintext); err != nil {
+	if err := s.passwordSchema.Validate(plaintext); err != nil {
 		return derp.Wrap(err, location, "Password does not meet requirements")
 	}
 
@@ -210,21 +148,4 @@ func (s *Steranko) ValidatePassword(plaintext string) error {
 
 	// Everything is OK!
 	return nil
-}
-
-// PushCookie sets a new cookie to the user's context, and moves their
-// existing cookie to be the "-backup" cookie.
-func (s *Steranko) PushCookie(ctx echo.Context, cookie http.Cookie) {
-
-	if originalCookie, err := ctx.Cookie(cookie.Name); err == nil {
-		backupCookie := copyCookie(originalCookie)
-		backupCookie.Name += "-backup"
-		ctx.SetCookie(&backupCookie)
-	}
-
-	ctx.SetCookie(&cookie)
-}
-
-func defaultPasswordHasher() PasswordHasher {
-	return hash.BCrypt(15)
 }

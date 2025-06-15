@@ -45,55 +45,26 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 	const location = "steranko.GetAuthorization"
 
 	// Retrieve the cookie value from the context
-	cookieName := CookieName(request)
-	cookie, err := request.Cookie(cookieName)
+	name := cookieName(request)
+	cookie, err := request.Cookie(name)
 
 	if err != nil {
 		return nil, derp.Wrap(err, location, "Invalid cookie")
 	}
 
-	return s.GetAuthorizationFromToken(cookie.Value)
-}
-
-// GetAuthorizationFromToken parses a JWT token
-func (s *Steranko) GetAuthorizationFromToken(tokenString string) (jwt.Claims, error) {
-
-	const location = "steranko.Context.GetAuthorizationFromToken"
-
+	// Parse the tokenString as a JWT token
 	claims := s.userService.NewClaims()
-
-	// Parse it as a JWT token
-	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindKey, jwt.WithValidMethods([]string{"HS256", "HS384", "HS512"}))
+	token, err := jwt.ParseWithClaims(cookie.Value, claims, s.keyService.FindKey, JWTValidMethods())
 
 	if err != nil {
 		return nil, derp.Wrap(err, location, "Error parsing token")
 	}
 
+	// Validate the token (date, signature, etc)
 	if !token.Valid {
-		return nil, derp.ForbiddenError(location, "Token is invalid", tokenString, token)
+		return nil, derp.ForbiddenError(location, "Token is invalid", cookie, token)
 	}
 
+	// Success!
 	return claims, nil
-}
-
-func (s *Steranko) SetPassword(user User, plaintext string) error {
-
-	hashedValue, err := s.PrimaryPasswordHasher().HashPassword(plaintext)
-
-	if err != nil {
-		return derp.Wrap(err, "steranko.SetPassword", "Error hashing password")
-	}
-
-	user.SetPassword(hashedValue)
-	return nil
-
-}
-
-/******************************************
- * Utility Methods
- ******************************************/
-
-// PasswordSchema returns the schema.Schema for validating passwords
-func (s *Steranko) PasswordSchema() *schema.Schema {
-	return &s.passwordSchema
 }

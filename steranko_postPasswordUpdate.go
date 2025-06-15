@@ -9,30 +9,32 @@ import (
 // be wired in to your REST API to allow users to update their passwords.
 func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 
+	const location = "steranko.PostPasswordUpdate"
+
 	// Bind transaction information to the request body
 	txn := UpdatePasswordTransaction{}
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Error binding transaction parameters")
+		return derp.Wrap(err, location, "Error binding transaction parameters")
 	}
 
 	// try to authenticate the user with their old password
 	user := s.userService.New()
 
-	if err := s.Authenticate(txn.Username, txn.OldPassword, user); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Cannot authenticate user", txn.Username)
+	if err := s.authenticate(txn.Username, txn.OldPassword, user); err != nil {
+		return derp.Wrap(err, location, "Cannot authenticate user", txn.Username)
 	}
 
 	// Validate that the password meets all system criteria
 	if err := s.ValidatePassword(txn.NewPassword); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Password does not meet requirements")
+		return derp.Wrap(err, location, "Password does not meet requirements")
 	}
 
 	// try to update the user information with their new password
 	user.SetPassword(txn.NewPassword)
 
 	if err := s.userService.Save(user, "Steranko: User Requested Password Update"); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordUpdate", "Error saving user record", user)
+		return derp.Wrap(err, location, "Error saving user record", user)
 	}
 
 	// Silence means success.

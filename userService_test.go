@@ -42,6 +42,14 @@ func (t *testUserService) NewClaims() jwt.Claims {
 	return jwt.MapClaims{}
 }
 
+func (t *testUserService) Claims(user User) (jwt.Claims, error) {
+	claims := jwt.MapClaims{
+		"username": user.GetUsername(),
+	}
+
+	return claims, nil
+}
+
 func (t *testUserService) Close() {
 
 }

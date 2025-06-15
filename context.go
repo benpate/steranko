@@ -17,6 +17,8 @@ type Context struct {
 // Values are cached so we don't re-parse the JWT cookie with mutiple calls.
 func (ctx *Context) Authorization() (jwt.Claims, error) {
 
+	const location = "steranko.Context.Authorization"
+
 	// If we have already cached a claims value, then just use that
 	if ctx.claims != nil {
 		return ctx.claims, nil
@@ -26,7 +28,7 @@ func (ctx *Context) Authorization() (jwt.Claims, error) {
 	claims, err := ctx.steranko.GetAuthorization(ctx.Request())
 
 	if err != nil {
-		return nil, derp.Wrap(err, "steranko.Context.Authorization", "Error parsing token")
+		return nil, derp.Wrap(err, location, "Error parsing token")
 	}
 
 	// Save the claims in the context (for next time, maybe) and return

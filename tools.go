@@ -4,7 +4,21 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 )
+
+// JWTValidmethods returns a jwt.ParserOption that restricts the JWT parser to only accept
+// secure encrytption methods defined inthe golang-jwt package.
+// https://pkg.go.dev/github.com/golang-jwt/jwt/v5@v5.2.1#WithValidMethods
+func JWTValidMethods() jwt.ParserOption {
+	return jwt.WithValidMethods([]string{
+		jwt.SigningMethodHS256.Name,
+		jwt.SigningMethodHS384.Name,
+		jwt.SigningMethodHS512.Name,
+	})
+}
 
 // sleepRandom sleeps for a random amount of time between the
 // minimum and maximum values
@@ -13,10 +27,23 @@ func sleepRandom(min int, max int) {
 	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 }
 
-// CookieName returns the cookie name to use for a given request.
+// PushCookie sets a new cookie to the user's context, and moves their
+// existing cookie to be the "-backup" cookie.
+func pushCookie(ctx echo.Context, cookie http.Cookie) {
+
+	if originalCookie, err := ctx.Cookie(cookie.Name); err == nil {
+		backupCookie := copyCookie(originalCookie)
+		backupCookie.Name += "-backup"
+		ctx.SetCookie(&backupCookie)
+	}
+
+	ctx.SetCookie(&cookie)
+}
+
+// cookieName returns the cookie name to use for a given request.
 // SSL requests use __Host-Authorization, which locks the cookie to this domain
 // Non-SSL requests use Authorization, which is not locked to a domain
-func CookieName(request *http.Request) string {
+func cookieName(request *http.Request) string {
 
 	// If this is a secure domain...
 	if isTLS(request) {

@@ -15,25 +15,25 @@ func (s *Steranko) SignOut(ctx echo.Context) bool {
 	// Default setting is to simply delete the login session cookie
 	// and report that there was no backup cookie.
 	request := ctx.Request()
-	cookieName := CookieName(request)
-	deleteCookieName := cookieName
-	backupCookieName := cookieName + "-backup"
+	name := cookieName(request)
+	deleteName := name
+	backupName := name + "-backup"
 	hasBackup := false
 
 	// Look for an "-backup" cookie.  If present, restore it to the primary cookie, and
 	// delete the original.
-	if backupCookie, err := request.Cookie(backupCookieName); err == nil {
+	if backupCookie, err := request.Cookie(backupName); err == nil {
 		restoredCookie := copyCookie(backupCookie)
-		restoredCookie.Name = cookieName
+		restoredCookie.Name = name
 		ctx.SetCookie(&restoredCookie)
 
-		deleteCookieName = backupCookieName
+		deleteName = backupName
 		hasBackup = true
 	}
 
 	// Delete the remaining cookie (either original or backup)
 	ctx.SetCookie(&http.Cookie{
-		Name:     deleteCookieName,        // Get the Cookie name to use for this context.
+		Name:     deleteName,              // Get the Cookie name to use for this context.
 		Value:    "",                      // Erase the value of the cookie
 		MaxAge:   0,                       // Expires the cookie immediately
 		Path:     "/",                     // This allows the cookie on all paths of this site.

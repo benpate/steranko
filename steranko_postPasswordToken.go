@@ -11,10 +11,12 @@ import (
 // send them a one time token to create a new password.
 func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 
+	const location = "steranko.PostPasswordToken"
+
 	txn := SigninTransaction{}
 
 	if err := ctx.Bind(&txn); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordToken", "Error binding transaction parameters")
+		return derp.Wrap(err, location, "Error binding transaction parameters")
 	}
 
 	user := s.userService.New()
@@ -22,14 +24,14 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 	if err := s.userService.Load(txn.Username, user); err != nil {
 
 		if derp.IsNotFound(err) {
-			return derp.UnauthorizedError("steranko.PostPasswordToken", "Unauthorized")
+			return derp.UnauthorizedError(location, "Unauthorized")
 		}
 
-		return derp.Wrap(err, "steranko.PostPasswordToken", "Error loading User account", txn.Username)
+		return derp.Wrap(err, location, "Error loading User account", txn.Username)
 	}
 
 	if err := s.userService.RequestPasswordReset(user); err != nil {
-		return derp.Wrap(err, "steranko.PostPasswordToken", "Error sending reset invitation")
+		return derp.Wrap(err, location, "Error sending reset invitation")
 	}
 
 	return nil
