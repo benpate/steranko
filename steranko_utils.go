@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"github.com/benpate/data"
 	"github.com/benpate/derp"
 	"github.com/benpate/steranko/plugin/hash"
 )
@@ -10,7 +11,7 @@ import (
  ******************************************/
 
 // SetPassword hashes the provided plaintext password and sets it on the User.
-func (s *Steranko) SetPassword(user User, plaintext string) error {
+func (s *Steranko[T]) SetPassword(user User, plaintext string) error {
 
 	const location = "steranko.SetPassword"
 
@@ -29,12 +30,12 @@ func (s *Steranko) SetPassword(user User, plaintext string) error {
  ******************************************/
 
 // Authenticate verifies a username/password combination.
-func (s *Steranko) authenticate(username string, password string, user User) error {
+func (s *Steranko[T]) authenticate(session data.Session, username string, password string, user User) error {
 
 	const location = "steranko.Authenticate"
 
 	// Try to load the User from the UserService
-	if err := s.userService.Load(username, user); err != nil {
+	if err := s.userService.Load(session, username, user); err != nil {
 
 		if derp.IsNotFound(err) {
 			return derp.UnauthorizedError(location, "Unauthorized", username, "user not found")
@@ -55,7 +56,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 		// authenticated.  If we can't update it now (for some reason) then we'll get it soon.
 		if err := s.SetPassword(user, password); err == nil {
 
-			if err := s.userService.Save(user, "Password automatically upgraded by Steranko"); err != nil {
+			if err := s.userService.Save(session, user, "Password automatically upgraded by Steranko"); err != nil {
 				derp.Report(derp.Wrap(err, location, "Error saving User account after password upgrade", user.GetUsername()))
 			}
 		}
@@ -70,7 +71,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 // then this returns TRUE, FALSE.  If the password matches any of THE BACKUP hashers,
 // then this returns TRUE, TRUE.  If the password does not match any of the hashers
 // then this returns FALSE, FALSE.
-func (s *Steranko) comparePassword(plaintext string, hashedValue string) (matches bool, update bool) {
+func (s *Steranko[T]) comparePassword(plaintext string, hashedValue string) (matches bool, update bool) {
 
 	// Try each hashing algorithm in order.
 	for index, passwordHasher := range s.passwordHashers {
@@ -95,7 +96,7 @@ func (s *Steranko) comparePassword(plaintext string, hashedValue string) (matche
 // getPasswordHasher returns the "primary" PasswordHasher, which is
 // the first one in the list. If no PasswordHashers have been configured,
 // it returns the default PasswordHasher.
-func (s *Steranko) getPasswordHasher() PasswordHasher {
+func (s *Steranko[T]) getPasswordHasher() PasswordHasher {
 	if len(s.passwordHashers) > 0 {
 		return s.passwordHashers[0]
 	}

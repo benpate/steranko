@@ -18,7 +18,7 @@ func (t *testUserService) New() User {
 	return &testUser{}
 }
 
-func (t *testUserService) Load(username string, user User) error {
+func (t *testUserService) Load(session data.Session, username string, user User) error {
 
 	filter := exp.Equal("username", username)
 	err := t.collection.Load(filter, user.(*testUser))
@@ -26,23 +26,23 @@ func (t *testUserService) Load(username string, user User) error {
 	return err
 }
 
-func (t *testUserService) Save(user User, comment string) error {
+func (t *testUserService) Save(session data.Session, user User, comment string) error {
 	return t.collection.Save(user.(data.Object), comment)
 }
 
-func (t *testUserService) Delete(user User, comment string) error {
+func (t *testUserService) Delete(session data.Session, user User, comment string) error {
 	return t.collection.Delete(user.(data.Object), comment)
 }
 
-func (t *testUserService) RequestPasswordReset(user User) error {
+func (t *testUserService) RequestPasswordReset(session data.Session, user User) error {
 	return nil
 }
 
-func (t *testUserService) NewClaims() jwt.Claims {
+func (t *testUserService) NewClaims() jwt.MapClaims {
 	return jwt.MapClaims{}
 }
 
-func (t *testUserService) Claims(user User) (jwt.Claims, error) {
+func (t *testUserService) Claims(user User) (jwt.MapClaims, error) {
 	claims := jwt.MapClaims{
 		"username": user.GetUsername(),
 	}

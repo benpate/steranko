@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"github.com/benpate/data"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -10,8 +11,8 @@ import (
 type KeyService interface {
 
 	// GetCurrentKey returns the current JWT key in use by the server
-	GetCurrentKey() (string, any, error)
+	GetCurrentKey(data.Session) (string, any, error)
 
 	// FindKey returns the key associated with the given JWT token.
-	FindKey(*jwt.Token) (any, error)
+	FindKey(data.Session) jwt.Keyfunc
 }

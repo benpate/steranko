@@ -21,7 +21,7 @@ func TestContext(t *testing.T) {
 		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ",
 	})
 
-	sterankoContext := Context{
+	sterankoContext := Context[jwt.MapClaims]{
 		Context:  e.NewContext(req, httptest.NewRecorder()),
 		steranko: s,
 	}
@@ -32,8 +32,7 @@ func TestContext(t *testing.T) {
 	require.NotNil(t, auth)
 	t.Log(auth)
 
-	authMap := auth.(jwt.MapClaims)
-	require.Equal(t, true, authMap["admin"])
-	require.Equal(t, "John Doe", authMap["name"])
-	require.Equal(t, "1234567890", authMap["sub"])
+	require.Equal(t, true, auth["admin"])
+	require.Equal(t, "John Doe", auth["name"])
+	require.Equal(t, "1234567890", auth["sub"])
 }

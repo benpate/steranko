@@ -4,18 +4,21 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/benpate/data"
 	"github.com/benpate/rosetta/schema"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAuthenticate(t *testing.T) {
 
 	s := getTestSteranko()
+	var session data.Session
 
 	{
 		// Test successful signin
 		user := s.userService.New()
-		err := s.authenticate("michael@jackson.com", "hee-hee", user)
+		err := s.authenticate(session, "michael@jackson.com", "hee-hee", user)
 		require.Nil(t, err)
 		require.NotNil(t, user)
 		require.Equal(t, "michael@jackson.com", user.GetUsername())
@@ -25,7 +28,7 @@ func TestAuthenticate(t *testing.T) {
 	{
 		// Test bad password
 		user := s.userService.New()
-		err := s.authenticate("michael@jackson.com", "hoo-hoo", user)
+		err := s.authenticate(session, "michael@jackson.com", "hoo-hoo", user)
 		require.NotNil(t, err)
 		require.Equal(t, "michael@jackson.com", user.GetUsername())
 		require.Equal(t, "hee-hee", user.GetPassword())
@@ -34,7 +37,7 @@ func TestAuthenticate(t *testing.T) {
 	{
 		// Test missing user
 		user := s.userService.New()
-		err := s.authenticate("kendall@jackson.com", "chardonay", user)
+		err := s.authenticate(session, "kendall@jackson.com", "chardonay", user)
 		require.NotNil(t, err)
 		require.Equal(t, "", user.GetUsername())
 		require.Equal(t, "", user.GetPassword())
@@ -57,7 +60,7 @@ func TestPasswordSchema(t *testing.T) {
 	err := json.Unmarshal([]byte(`{"type":"string", "minLength":0, "maxLength":20}`), &input)
 	require.Nil(t, err)
 
-	s := New(getTestUserService(), getTestKeyService(), WithPasswordSchema(input))
+	s := New(getTestUserService(), getTestKeyService(), WithPasswordSchema[jwt.MapClaims](input))
 	sch := s.passwordSchema
 
 	require.NotNil(t, sch)

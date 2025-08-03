@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"github.com/benpate/data"
 	"github.com/benpate/derp"
 	"github.com/labstack/echo/v4"
 )
@@ -9,7 +10,7 @@ import (
 // be wired in to your REST API to allow users to tell the server that they
 // forgot their password.  This should initiate some way for the system to
 // send them a one time token to create a new password.
-func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
+func (s *Steranko[T]) PostPasswordToken(ctx echo.Context, session data.Session) error {
 
 	const location = "steranko.PostPasswordToken"
 
@@ -21,7 +22,7 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 
 	user := s.userService.New()
 
-	if err := s.userService.Load(txn.Username, user); err != nil {
+	if err := s.userService.Load(session, txn.Username, user); err != nil {
 
 		if derp.IsNotFound(err) {
 			return derp.UnauthorizedError(location, "Unauthorized")
@@ -30,7 +31,7 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 		return derp.Wrap(err, location, "Error loading User account", txn.Username)
 	}
 
-	if err := s.userService.RequestPasswordReset(user); err != nil {
+	if err := s.userService.RequestPasswordReset(session, user); err != nil {
 		return derp.Wrap(err, location, "Error sending reset invitation")
 	}
 

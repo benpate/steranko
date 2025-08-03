@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/benpate/data"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -14,6 +15,7 @@ import (
 func TestPostPasswordUpdate_Fail(t *testing.T) {
 
 	s := getTestSteranko()
+	var session data.Session
 
 	// Mock Form Body
 	transaction := make(url.Values)
@@ -27,10 +29,10 @@ func TestPostPasswordUpdate_Fail(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ctx := e.NewContext(req, rec)
 
 	// Assertions
-	require.NotNil(t, s.PostPasswordUpdate(c))
+	require.NotNil(t, s.PostPasswordUpdate(ctx, session))
 	// require.Equal(t, http.StatusBadRequest, rec.Code)
 
 	// Verify Password NOT changed
@@ -40,6 +42,7 @@ func TestPostPasswordUpdate_Fail(t *testing.T) {
 func TestPostPasswordUpdate_Success(t *testing.T) {
 
 	s := getTestSteranko()
+	var session data.Session
 
 	// Mock Form Body
 	transaction := make(url.Values)
@@ -53,10 +56,10 @@ func TestPostPasswordUpdate_Success(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	ctx := e.NewContext(req, rec)
 
 	// Assertions
-	require.Nil(t, s.PostPasswordUpdate(c))
+	require.Nil(t, s.PostPasswordUpdate(ctx, session))
 	require.Equal(t, http.StatusOK, rec.Code)
 
 	// Verify Password NOT changed
