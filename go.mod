@@ -4,8 +4,6 @@ go 1.23.0
 
 toolchain go1.23.1
 
-replace github.com/benpate/data => ../data
-
 require (
 	github.com/benpate/data v0.30.0
 	github.com/benpate/data-mock v0.30.0

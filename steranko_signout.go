@@ -10,7 +10,7 @@ import (
 // in your REST API, or can be wrapped by your own custom function.
 // It returns TRUE if the user had a backup cookie that has been restored,
 // and FALSE if the user is now completely signed out.
-func (s *Steranko[T]) SignOut(ctx echo.Context) bool {
+func (s *Steranko) SignOut(ctx echo.Context) bool {
 
 	// Default setting is to simply delete the login session cookie
 	// and report that there was no backup cookie.

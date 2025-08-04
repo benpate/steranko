@@ -1,11 +1,13 @@
 package steranko
 
-// REMOVED BECAUSE THIS NO LONGER WORKS WITH THE SESSION API
-/*
+import (
+	"github.com/labstack/echo/v4"
+)
+
 // Middleware is a standalone middleware that works for multi-tenant
 // environments, where you may need to use a factory to load the specific
 // steranko settings depending on the domain being called.
-func Middleware[T jwt.Claims](factory Factory[T]) echo.MiddlewareFunc {
+func Middleware(factory Factory) echo.MiddlewareFunc {
 
 	// this is the middleware function
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -21,19 +23,17 @@ func Middleware[T jwt.Claims](factory Factory[T]) echo.MiddlewareFunc {
 				return err
 			}
 
-			// REMOVING THIS (FOR NOW) BECAUSE IT'S A NO-OP
 			// Verify that the request is valid
-			// if err := s.ApproveRequest(ctx); err != nil {
-			// 	return err
-			// }
+			if err := s.ApproveRequest(ctx); err != nil {
+				return err
+			}
 
 			// call the next function in the chain, now
 			// using a Steranko context instead of the original
-			return next(&Context[T]{
+			return next(&Context{
 				Context:  ctx,
 				steranko: s,
 			})
 		}
 	}
 }
-*/

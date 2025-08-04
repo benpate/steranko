@@ -8,10 +8,9 @@ import (
 	mockdb "github.com/benpate/data-mock"
 	"github.com/benpate/rosetta/schema"
 	"github.com/benpate/steranko/plugin/hash"
-	"github.com/golang-jwt/jwt/v5"
 )
 
-func getTestSteranko() *Steranko[jwt.MapClaims] {
+func getTestSteranko() *Steranko {
 
 	var result schema.Schema
 
@@ -22,14 +21,12 @@ func getTestSteranko() *Steranko[jwt.MapClaims] {
 	return New(
 		getTestUserService(),
 		getTestKeyService(),
-		WithPasswordSchema[jwt.MapClaims](result),
-		WithPasswordHasher[jwt.MapClaims](hash.Plaintext{}),
+		WithPasswordSchema(result),
+		WithPasswordHasher(hash.Plaintext{}),
 	)
 }
 
-func getTestUserService() UserService[jwt.MapClaims] {
-
-	var session data.Session
+func getTestUserService() UserService {
 
 	userService := &testUserService{
 		collection: getTestCollection(),
@@ -38,21 +35,21 @@ func getTestUserService() UserService[jwt.MapClaims] {
 	mike := userService.New()
 	mike.SetUsername("michael@jackson.com")
 	mike.SetPassword("hee-hee")
-	if err := userService.Save(session, mike, "Created"); err != nil {
+	if err := userService.Save(mike, "Created"); err != nil {
 		panic(err)
 	}
 
 	janet := userService.New()
 	janet.SetUsername("janet@jackson.com")
 	janet.SetPassword("nasty")
-	if err := userService.Save(session, janet, "Created"); err != nil {
+	if err := userService.Save(janet, "Created"); err != nil {
 		panic(err)
 	}
 
 	andy := userService.New()
 	andy.SetUsername("andrew@jackson.com")
 	andy.SetPassword("whitehouse")
-	if err := userService.Save(session, andy, "Created"); err != nil {
+	if err := userService.Save(andy, "Created"); err != nil {
 		panic(err)
 	}
 
