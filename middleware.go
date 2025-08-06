@@ -30,10 +30,7 @@ func Middleware(factory Factory) echo.MiddlewareFunc {
 
 			// call the next function in the chain, now
 			// using a Steranko context instead of the original
-			return next(&Context{
-				Context:  ctx,
-				steranko: s,
-			})
+			return next(s.Context(ctx))
 		}
 	}
 }

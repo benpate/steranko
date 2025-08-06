@@ -6,6 +6,7 @@ import (
 	"github.com/benpate/derp"
 	"github.com/benpate/rosetta/schema"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 )
 
 // Steranko contains all required configuration information for this library.
@@ -36,6 +37,13 @@ func New(userService UserService, keyService KeyService, options ...Option) *Ste
 func (s *Steranko) WithOptions(options ...Option) {
 	for _, option := range options {
 		option(s)
+	}
+}
+
+func (s *Steranko) Context(ctx echo.Context) *Context {
+	return &Context{
+		steranko: s,
+		Context:  ctx,
 	}
 }
 
