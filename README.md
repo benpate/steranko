@@ -10,7 +10,7 @@
 
 Steranko is an embeddable library that manages user authentication, and authorization.  You can configure it at run time (or compile time) to meet your specific project needs.
 
-To use Steranko, you have to implement two tiny interfaces in your code, then wire Steranko's handlers into your HTTP server.
+To use Steranko, you only have to implement two interfaces in your code, then wire Steranko's handlers into your HTTP server.
 
 ```go
 s := steranko.New(userService, steranko.Conig{
