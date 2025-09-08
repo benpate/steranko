@@ -5,15 +5,15 @@ go 1.23.0
 toolchain go1.23.1
 
 require (
-	github.com/benpate/data v0.30.0
+	github.com/benpate/data v0.31.0
 	github.com/benpate/data-mock v0.30.0
 	github.com/benpate/derp v0.32.5
-	github.com/benpate/exp v0.8.5
+	github.com/benpate/exp v0.8.6
 	github.com/benpate/remote v0.17.4
 	github.com/benpate/rosetta v0.25.14
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/labstack/echo/v4 v4.13.4
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	golang.org/x/crypto v0.40.0
 )
 
