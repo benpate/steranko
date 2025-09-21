@@ -30,7 +30,6 @@ func TestContext(t *testing.T) {
 
 	require.Nil(t, err)
 	require.NotNil(t, auth)
-	t.Log(auth)
 
 	authMap := auth.(jwt.MapClaims)
 	require.Equal(t, true, authMap["admin"])
