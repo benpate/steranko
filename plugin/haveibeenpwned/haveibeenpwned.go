@@ -48,10 +48,10 @@ func (api *API) ValidatePassword(password string, language string) (OK bool, mes
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		values := strings.Split(line, ":")
+		usedSuffix, useCount, _ := strings.Cut(line, ":")
 
-		if values[0] == suffix {
-			return false, "Password has been used " + values[1] + " times before on hacked websites.  Visit https://haveibeenpwned.com for more info."
+		if usedSuffix == suffix {
+			return false, "Password has been used " + useCount + " times before on hacked websites.  Visit https://haveibeenpwned.com for more info."
 		}
 	}
 

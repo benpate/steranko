@@ -13,11 +13,22 @@ import (
 // secure encrytption methods defined inthe golang-jwt package.
 // https://pkg.go.dev/github.com/golang-jwt/jwt/v5@v5.2.1#WithValidMethods
 func JWTValidMethods() jwt.ParserOption {
-	return jwt.WithValidMethods([]string{
-		jwt.SigningMethodHS256.Name,
-		jwt.SigningMethodHS384.Name,
-		jwt.SigningMethodHS512.Name,
-	})
+
+	result := make([]string, 0, 3)
+
+	if hs256 := jwt.SigningMethodHS256; hs256 != nil {
+		result = append(result, hs256.Name)
+	}
+
+	if hs384 := jwt.SigningMethodES384; hs384 != nil {
+		result = append(result, hs384.Name)
+	}
+
+	if hs512 := jwt.SigningMethodHS512; hs512 != nil {
+		result = append(result, hs512.Name)
+	}
+
+	return jwt.WithValidMethods(result)
 }
 
 // sleepRandom sleeps for a random amount of time between the

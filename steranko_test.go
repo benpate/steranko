@@ -6,6 +6,7 @@ import (
 
 	"github.com/benpate/data"
 	mockdb "github.com/benpate/data-mock"
+	"github.com/benpate/derp"
 	"github.com/benpate/rosetta/schema"
 	"github.com/benpate/steranko/plugin/hash"
 )
@@ -60,7 +61,13 @@ func getTestCollection() data.Collection {
 
 	db := mockdb.New()
 
-	session, _ := db.Session(context.TODO())
+	session, err := db.Session(context.TODO())
+	derp.Report(err)
+
+	if session == nil {
+		return nil
+	}
+
 	collection := session.Collection("Users")
 
 	return collection
