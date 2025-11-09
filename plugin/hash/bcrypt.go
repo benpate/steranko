@@ -48,7 +48,7 @@ func (bc BCrypt) CompareHashedPassword(hashedValue string, plaintext string) (OK
 
 	if err != nil {
 		// Silently report this error because we don't want to interrupt the application flow.
-		derp.Report(derp.Wrap(err, "steranko.plugin.hash.CompareHashedPassword", "Error generating password cost", derp.WithInternalError()))
+		derp.Report(derp.Wrap(err, "steranko.plugin.hash.CompareHashedPassword", "Unable to generate password cost", derp.WithInternalError()))
 	}
 
 	if cost < int(bc) {

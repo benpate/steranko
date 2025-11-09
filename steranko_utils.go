@@ -40,7 +40,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 			return derp.UnauthorizedError(location, "Unauthorized", username, "user not found")
 		}
 
-		return derp.Wrap(err, location, "Error loading User account", username, "database error")
+		return derp.Wrap(err, location, "Unable to load User account", username, "database error")
 	}
 
 	// If we're here, then we have a matching user account. So, try to authenticate the password
@@ -56,7 +56,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 		if err := s.SetPassword(user, password); err == nil {
 
 			if err := s.userService.Save(user, "Password automatically upgraded by Steranko"); err != nil {
-				derp.Report(derp.Wrap(err, location, "Error saving User account after password upgrade", user.GetUsername()))
+				derp.Report(derp.Wrap(err, location, "Unable to save User account after password upgrade", user.GetUsername()))
 			}
 		}
 	}

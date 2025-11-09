@@ -27,7 +27,7 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 			return derp.UnauthorizedError(location, "Unauthorized")
 		}
 
-		return derp.Wrap(err, location, "Error loading User account", txn.Username)
+		return derp.Wrap(err, location, "Unable to load User account", txn.Username)
 	}
 
 	if err := s.userService.RequestPasswordReset(user); err != nil {

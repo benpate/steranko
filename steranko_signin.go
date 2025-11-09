@@ -51,7 +51,7 @@ func (s *Steranko) SigninUser(ctx echo.Context, user User) error {
 	claims, err := s.userService.Claims(user)
 
 	if err != nil {
-		return derp.Wrap(err, location, "Error generating JSON Web Token claims")
+		return derp.Wrap(err, location, "Unable to generate JSON Web Token claims")
 	}
 
 	// Set the claims as a cookie in the User's browser
@@ -72,7 +72,7 @@ func (s *Steranko) SetCookie(ctx echo.Context, claims jwt.Claims) error {
 	token, err := s.CreateJWT(claims)
 
 	if err != nil {
-		return derp.Wrap(err, location, "Error creating JSON Web Token")
+		return derp.Wrap(err, location, "Unable to create JSON Web Token")
 	}
 
 	// Set the Cookie in the Response

@@ -34,7 +34,7 @@ func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 	user.SetPassword(txn.NewPassword)
 
 	if err := s.userService.Save(user, "Steranko: User Requested Password Update"); err != nil {
-		return derp.Wrap(err, location, "Error saving user record", user)
+		return derp.Wrap(err, location, "Unable to save user record", user)
 	}
 
 	// Silence means success.
