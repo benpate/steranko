@@ -20,7 +20,7 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 
 	// Collect values from the request body
 	if err := ctx.Bind(&txn); err != nil {
-		return nil, derp.Wrap(err, location, "Unable to bind request body", derp.WithCode(http.StatusBadRequest))
+		return nil, derp.Wrap(err, location, "Unable to bind request body", derp.WithBadRequest())
 	}
 
 	// (short) random sleep to thwart timing attacks
