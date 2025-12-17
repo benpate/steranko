@@ -2,6 +2,7 @@ package steranko
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/benpate/derp"
 	"github.com/benpate/rosetta/schema"
@@ -53,16 +54,11 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 	const location = "steranko.GetAuthorization"
 
 	// Retrieve the cookie value from the context
-	name := cookieName(request)
-	cookie, err := request.Cookie(name)
-
-	if err != nil {
-		return nil, derp.Wrap(err, location, "Invalid cookie")
-	}
+	tokenString := s.findAuthorization(request)
 
 	// Parse the tokenString as a JWT token
 	claims := s.userService.NewClaims()
-	token, err := jwt.ParseWithClaims(cookie.Value, claims, s.keyService.FindKey, JWTValidMethods())
+	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindKey, JWTValidMethods())
 
 	if err != nil {
 		return nil, derp.Wrap(err, location, "Error parsing token")
@@ -70,9 +66,26 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 
 	// Validate the token (date, signature, etc)
 	if !token.Valid {
-		return nil, derp.ForbiddenError(location, "Token is invalid", cookie, token)
+		return nil, derp.ForbiddenError(location, "Token is invalid", tokenString, token)
 	}
 
 	// Success!
 	return claims, nil
+}
+
+// findAuthorzation looks for a JWT token in 1) Cookies and 2) Authorization headers
+func (s *Steranko) findAuthorization(request *http.Request) string {
+
+	// First look at cookies
+	if cookie, err := request.Cookie(cookieName(request)); err == nil {
+		return cookie.Value
+	}
+
+	// Otherwise, look at the Authorization header
+	if bearerToken := request.Header.Get("Authorization"); bearerToken != "" {
+		bearerToken = strings.TrimPrefix(bearerToken, "Bearer ")
+		return bearerToken
+	}
+
+	return ""
 }
