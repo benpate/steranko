@@ -28,7 +28,7 @@ func (api *API) ValidatePassword(password string, language string) (OK bool, mes
 
 	// Split the encoded value into prefix and suffix
 	prefix := encoded[:5]
-	suffix := encoded[5:]
+	suffix := encoded[5:] //nolint:scopeguard
 
 	// Send the request to the remote API.  If this breaks, then we'll just get no breach reports and will return 'success'.
 	var response bytes.Buffer
@@ -44,11 +44,9 @@ func (api *API) ValidatePassword(password string, language string) (OK bool, mes
 		return true, ""
 	}
 
-	scanner := bufio.NewScanner(&response)
-
-	for scanner.Scan() {
+	for scanner := bufio.NewScanner(&response); scanner.Scan(); {
 		line := scanner.Text()
-		usedSuffix, useCount, _ := strings.Cut(line, ":")
+		usedSuffix, useCount, _ := strings.Cut(line, ":") // nolint:scopeguard - readability
 
 		if usedSuffix == suffix {
 			return false, "Password has been used " + useCount + " times before on hacked websites.  Visit https://haveibeenpwned.com for more info."

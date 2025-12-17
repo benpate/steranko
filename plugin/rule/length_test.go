@@ -54,7 +54,7 @@ func TestLength(t *testing.T) {
 		for x := 1; x < 30; x = x + 1 {
 			testValue = testValue + "a"
 
-			ok, message := plugin20.ValidatePassword(testValue, "en")
+			ok, message := plugin20.ValidatePassword(testValue, "en") // nolint:scopeguard readability
 
 			if x < 20 {
 				assert.False(t, ok)
