@@ -39,13 +39,16 @@ func sleepRandom(min int, max int) {
 }
 
 // PushCookie sets a new cookie to the user's context, and moves their
-// existing cookie to be the "-backup" cookie.
+// existing cookie (if present) to be the "-backup" cookie.
 func pushCookie(ctx echo.Context, cookie http.Cookie) {
 
 	if originalCookie, err := ctx.Cookie(cookie.Name); err == nil {
 		backupCookie := copyCookie(originalCookie)
-		backupCookie.Name += "-backup"
-		ctx.SetCookie(&backupCookie)
+
+		if backupCookie.Value != "" {
+			backupCookie.Name += "-backup"
+			ctx.SetCookie(&backupCookie)
+		}
 	}
 
 	ctx.SetCookie(&cookie)

@@ -23,12 +23,16 @@ func (s *Steranko) SignOut(ctx echo.Context) bool {
 	// Look for an "-backup" cookie.  If present, restore it to the primary cookie, and
 	// delete the original.
 	if backupCookie, err := request.Cookie(backupName); err == nil {
-		restoredCookie := copyCookie(backupCookie)
-		restoredCookie.Name = name
-		ctx.SetCookie(&restoredCookie)
 
-		deleteName = backupName
-		hasBackup = true
+		// The backup cookie cannot be empty...
+		if backupCookie.Value != "" {
+			restoredCookie := copyCookie(backupCookie)
+			restoredCookie.Name = name
+			ctx.SetCookie(&restoredCookie)
+
+			deleteName = backupName
+			hasBackup = true
+		}
 	}
 
 	// Delete the remaining cookie (either original or backup)
