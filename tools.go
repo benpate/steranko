@@ -43,9 +43,8 @@ func sleepRandom(min int, max int) {
 func pushCookie(ctx echo.Context, cookie http.Cookie) {
 
 	if originalCookie, err := ctx.Cookie(cookie.Name); err == nil {
-		backupCookie := copyCookie(originalCookie)
 
-		if backupCookie.Value != "" {
+		if backupCookie := copyCookie(originalCookie); backupCookie.Value != "" {
 			backupCookie.Name += "-backup"
 			ctx.SetCookie(&backupCookie)
 		}
