@@ -24,14 +24,14 @@ func (s *Steranko) PostPasswordToken(ctx echo.Context) error {
 	if err := s.userService.Load(txn.Username, user); err != nil {
 
 		if derp.IsNotFound(err) {
-			return derp.UnauthorizedError(location, "Unauthorized")
+			return derp.Unauthorized(location, "Unauthorized")
 		}
 
 		return derp.Wrap(err, location, "Unable to load User account", txn.Username)
 	}
 
 	if err := s.userService.RequestPasswordReset(user); err != nil {
-		return derp.Wrap(err, location, "Error sending reset invitation")
+		return derp.Wrap(err, location, "Unable to send reset invitation")
 	}
 
 	return nil

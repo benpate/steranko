@@ -37,17 +37,17 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 	if err := s.userService.Load(username, user); err != nil {
 
 		if derp.IsNotFound(err) {
-			return derp.UnauthorizedError(location, "Unauthorized", username, "user not found")
+			return derp.Unauthorized(location, "Unauthorized", username, "user not found")
 		}
 
 		return derp.Wrap(err, location, "Unable to load User account", username, "database error")
 	}
 
 	// If we're here, then we have a matching user account. So, try to authenticate the password
-	ok, update := s.comparePassword(password, user.GetPassword())
+	ok, update := s.ComparePassword(password, user.GetPassword())
 
 	if !ok {
-		return derp.UnauthorizedError(location, "Unauthorized", username, "invalid password")
+		return derp.Unauthorized(location, "Unauthorized", username, "invalid password")
 	}
 
 	if update {
@@ -70,7 +70,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 // then this returns TRUE, FALSE.  If the password matches any of THE BACKUP hashers,
 // then this returns TRUE, TRUE.  If the password does not match any of the hashers
 // then this returns FALSE, FALSE.
-func (s *Steranko) comparePassword(plaintext string, hashedValue string) (matches bool, update bool) {
+func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (matches bool, update bool) {
 
 	// Try each hashing algorithm in order.
 	for index, passwordHasher := range s.passwordHashers {

@@ -66,7 +66,7 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 
 	// Validate the token (date, signature, etc)
 	if !token.Valid {
-		return nil, derp.ForbiddenError(location, "Token is invalid", tokenString, token)
+		return nil, derp.Forbidden(location, "Token is invalid", tokenString, token)
 	}
 
 	// Success!

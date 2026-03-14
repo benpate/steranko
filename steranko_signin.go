@@ -30,7 +30,7 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 	user := s.userService.New()
 	if err := s.authenticate(txn.Username, txn.Password, user); err != nil {
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
-		return nil, derp.ForbiddenError(location, "Invalid username/password.")
+		return nil, derp.Forbidden(location, "Invalid username/password.")
 	}
 
 	// Try to Sign the User into the server
@@ -56,7 +56,7 @@ func (s *Steranko) SigninUser(ctx echo.Context, user User) error {
 
 	// Set the claims as a cookie in the User's browser
 	if err := s.SetCookie(ctx, claims); err != nil {
-		return derp.Wrap(err, location, "Error setting signin cookie")
+		return derp.Wrap(err, location, "Unable to set signin cookie")
 	}
 
 	// Success.
@@ -142,7 +142,7 @@ func (s *Steranko) ValidatePassword(plaintext string) error {
 	// Validate other password rules (complex functions, external services)
 	for _, rule := range s.passwordRules {
 		if ok, message := rule.ValidatePassword(plaintext); !ok {
-			return derp.BadRequestError(location, message)
+			return derp.BadRequest(location, message)
 		}
 	}
 
