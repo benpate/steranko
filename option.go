@@ -33,6 +33,16 @@ func WithPasswordHasher(hashers ...PasswordHasher) Option {
 	}
 }
 
+// WithSigninService sets the SigninService to use when tracking signin
+// successes and failures. This related to the "MaxSigninFailures" and
+// "SigninLockoutMinutes" options, which lock out users after too many
+// failed signin attempts.
+func WithSigninService(service SigninService) Option {
+	return func(s *Steranko) {
+		s.signinService = service
+	}
+}
+
 // WithConfigFile loads the values from a configuration file into
 // this Steranko instance.
 func WithConfigFile(config Config) Option {

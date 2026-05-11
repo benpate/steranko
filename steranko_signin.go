@@ -26,9 +26,22 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 	// (short) random sleep to thwart timing attacks
 	sleepRandom(500, 1500)
 
+	// IF the user is locked out, then prevent the signin from continuing
+	if locked := s.signinService.IsSigninLocked(ctx.Request(), txn.Username); locked {
+
+		// Log (another) failed signin
+		s.signinService.SigninFailure(ctx.Request(), txn.Username)
+
+		return nil, derp.Forbidden(location, "Account locked")
+	}
+
 	// Try to authenticate the user
 	user := s.userService.New()
 	if err := s.authenticate(txn.Username, txn.Password, user); err != nil {
+
+		// Log the failure
+		s.signinService.SigninFailure(ctx.Request(), txn.Username)
+
 		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
 		return nil, derp.Forbidden(location, "Invalid username/password.")
 	}
@@ -37,6 +50,9 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 	if err := s.SigninUser(ctx, user); err != nil {
 		return nil, derp.Wrap(err, location, "Error signing in user", user.GetUsername())
 	}
+
+	// Log the successful signin
+	s.signinService.SigninSuccess(ctx.Request(), txn.Username)
 
 	// Success!
 	return user, nil

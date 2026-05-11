@@ -3,8 +3,6 @@ package steranko
 import "github.com/golang-jwt/jwt/v5"
 
 // UserService wraps all of the functions that must be provided to Steranko by your application.
-// This API matches the presto.Service API very closely, so it should be possible to wrap an
-// existing presto service to serve Steranko, too.
 type UserService interface {
 
 	// New creates a newly initialized User that is ready to use

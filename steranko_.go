@@ -13,6 +13,7 @@ import (
 // Steranko contains all required configuration information for this library.
 type Steranko struct {
 	userService     UserService      // Service that provides CRUD operations on Users
+	signinService   SigninService    // Service that tracks signin successes and failures for users.
 	keyService      KeyService       // Service that generates/retrieves encryption keys used in JWT signatures.
 	passwordSchema  schema.Schema    // Validating schema to use when setting new passwords.
 	passwordRules   []PasswordRule   // PasswordRules are additional validators that are applied to new passwords.
@@ -25,6 +26,7 @@ func New(userService UserService, keyService KeyService, options ...Option) *Ste
 	result := Steranko{
 		userService:     userService,
 		keyService:      keyService,
+		signinService:   NilSigninService{},
 		passwordHashers: []PasswordHasher{defaultPasswordHasher()}, // hash.Plaintext{},
 		passwordSchema:  schema.New(schema.String{MinLength: 8, Required: true}),
 	}
@@ -34,13 +36,15 @@ func New(userService UserService, keyService KeyService, options ...Option) *Ste
 	return &result
 }
 
-// WithOptios applies the provided Option functions to this Steranko instance.
+// WithOptions applies the provided Option functions to this Steranko instance.
 func (s *Steranko) WithOptions(options ...Option) {
 	for _, option := range options {
 		option(s)
 	}
 }
 
+// Context returns a new steranko.Context that wraps the provided echo.Context
+// and embeds this Steranko instance.
 func (s *Steranko) Context(ctx echo.Context) *Context {
 	return &Context{
 		steranko: s,
@@ -73,7 +77,7 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 	return claims, nil
 }
 
-// findAuthorzation looks for a JWT token in 1) Cookies and 2) Authorization headers
+// findAuthorization looks for a JWT token in 1) Cookies and 2) Authorization headers
 func (s *Steranko) findAuthorization(request *http.Request) string {
 
 	// First look at cookies
