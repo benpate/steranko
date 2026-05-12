@@ -31,6 +31,7 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 
 		// Log (another) failed signin
 		s.signinService.SigninFailure(ctx.Request(), txn.Username)
+		sleepRandom(1000, 2000) // (medium) random sleep to punish invalid signin attempts
 
 		return nil, derp.Forbidden(location, "Account locked")
 	}
@@ -42,7 +43,7 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 		// Log the failure
 		s.signinService.SigninFailure(ctx.Request(), txn.Username)
 
-		sleepRandom(1000, 3000) // (medium) random sleep to punish invalid signin attempts
+		sleepRandom(1000, 2000) // (medium) random sleep to punish invalid signin attempts
 		return nil, derp.Forbidden(location, "Invalid username/password.")
 	}
 
