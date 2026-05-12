@@ -33,7 +33,7 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 		s.signinService.SigninFailure(ctx.Request(), txn.Username)
 		sleepRandom(1000, 2000) // (medium) random sleep to punish invalid signin attempts
 
-		return nil, derp.Forbidden(location, "Account locked")
+		return nil, derp.Forbidden(location, "Account locked. You must reset your password.")
 	}
 
 	// Try to authenticate the user
@@ -49,7 +49,7 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 
 	// Try to Sign the User into the server
 	if err := s.SigninUser(ctx, user); err != nil {
-		return nil, derp.Wrap(err, location, "Error signing in user", user.GetUsername())
+		return nil, derp.Wrap(err, location, "Unable to sign in. Internal Error.", user.GetUsername())
 	}
 
 	// Log the successful signin
