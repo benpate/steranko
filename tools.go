@@ -1,7 +1,8 @@
 package steranko
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"net/http"
 	"time"
 
@@ -32,9 +33,16 @@ func JWTValidMethods() jwt.ParserOption {
 }
 
 // sleepRandom sleeps for a random amount of time between the
-// minimum and maximum values
+// minimum and maximum values. It draws from crypto/rand so the jitter that
+// masks signin timing cannot be predicted by an attacker. If the random draw
+// fails (effectively never), it falls back to the maximum delay.
 func sleepRandom(min int, max int) {
-	sleepTime := rand.Intn(max-min+1) + min
+	sleepTime := max
+
+	if offset, err := rand.Int(rand.Reader, big.NewInt(int64(max-min+1))); err == nil {
+		sleepTime = min + int(offset.Int64())
+	}
+
 	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 }
 
