@@ -1,5 +1,7 @@
 package hash
 
+import "crypto/subtle"
+
 // Plaintext is an awful password encryption scheme that should NEVER be used outside of initial development.
 type Plaintext struct{}
 
@@ -15,5 +17,7 @@ func (p Plaintext) HashPassword(password string) (string, error) {
 
 // CompareHashedPassword checks that a ciphertext value matches the plaintext password.
 func (p Plaintext) CompareHashedPassword(ciphertext string, plaintext string) (OK bool, rehash bool) {
-	return (ciphertext == plaintext), true
+	// Constant-time comparison avoids leaking how many leading characters match.
+	match := subtle.ConstantTimeCompare([]byte(ciphertext), []byte(plaintext)) == 1
+	return match, true
 }
