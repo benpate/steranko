@@ -30,17 +30,19 @@ func (api *API) ValidatePassword(password string, language string) (OK bool, mes
 	prefix := encoded[:5]
 	suffix := encoded[5:] //nolint:scopeguard
 
-	// Send the request to the remote API.  If this breaks, then we'll just get no breach reports and will return 'success'.
+	// Send the request to the remote API. The range endpoint returns only a few
+	// KB, so cap the response well below remote's 1GB default to bound memory
+	// against a hostile or malfunctioning server.
 	var response bytes.Buffer
 
 	transaction := remote.Get("https://api.pwnedpasswords.com/range/" + prefix).
+		MaxResponseSize(1 << 20). // 1MB
 		Result(&response)
 
+	// Fail open: if the remote service is unreachable (or the response exceeds
+	// the size cap) we cannot check for breaches, so we allow the password
+	// rather than block all signins on a third-party outage.
 	if err := transaction.Send(); err != nil {
-
-		// Error connecting to the remote service.
-		// Swallow this for now, because we don't have a better way
-		// of reporting the error..
 		return true, ""
 	}
 
