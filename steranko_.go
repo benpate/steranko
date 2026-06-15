@@ -69,8 +69,10 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 	}
 
 	// Validate the token (date, signature, etc)
+	// NOTE: the raw token is deliberately excluded from the error details
+	// because it is a bearer credential that must not leak into logs.
 	if !token.Valid {
-		return nil, derp.Forbidden(location, "Token is invalid", tokenString, token)
+		return nil, derp.Forbidden(location, "Token is invalid")
 	}
 
 	// Success!
