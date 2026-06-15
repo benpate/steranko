@@ -6,6 +6,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestLength_Name(t *testing.T) {
+	assert.Equal(t, "MinLength", MinLength(0).Name())
+	assert.Equal(t, "MinLength", MinLength(20).Name())
+}
+
 func TestLength(t *testing.T) {
 
 	plugin0 := MinLength(0)

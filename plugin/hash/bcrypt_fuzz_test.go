@@ -55,6 +55,16 @@ func TestBCrypt_InvalidHashedValue(t *testing.T) {
 	require.False(t, rehash)
 }
 
+// TestBCrypt_InvalidCost confirms that an out-of-range cost is reported as an
+// error from HashPassword rather than producing an unusable hash. bcrypt's
+// maximum cost is 31; anything higher must fail.
+func TestBCrypt_InvalidCost(t *testing.T) {
+
+	hashed, err := BCrypt(99).HashPassword("password")
+	require.NotNil(t, err)
+	require.Empty(t, hashed)
+}
+
 // FuzzBCryptCompareHashedPassword confirms that comparing arbitrary stored
 // values and plaintexts never panics, and never reports a match for a value
 // that is not a real bcrypt hash of the plaintext.
