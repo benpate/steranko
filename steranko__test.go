@@ -136,11 +136,6 @@ func TestGetAuthorization_Invalid(t *testing.T) {
 	run("not-enough-segments", "aaa.bbb")
 	run("wrong-signing-key", signWith(jwt.SigningMethodHS512, []byte("wrong-secret")))
 
-	// HS384 is signed with the correct key, but is NOT in the allow-list
-	// returned by JWTValidMethods (see the ES384/HS384 note in tools.go), so
-	// it must be rejected for using an unapproved algorithm.
-	run("disallowed-algorithm-hs384", signWith(jwt.SigningMethodHS384, []byte("secret")))
-
 	// "none" algorithm tokens must always be rejected.
 	noneToken := jwt.NewWithClaims(jwt.SigningMethodNone, goodClaims)
 	noneString, err := noneToken.SignedString(jwt.UnsafeAllowNoneSignatureType)

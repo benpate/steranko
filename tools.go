@@ -20,7 +20,7 @@ func JWTValidMethods() jwt.ParserOption {
 		result = append(result, hs256.Name)
 	}
 
-	if hs384 := jwt.SigningMethodES384; hs384 != nil {
+	if hs384 := jwt.SigningMethodHS384; hs384 != nil {
 		result = append(result, hs384.Name)
 	}
 

@@ -73,12 +73,9 @@ func TestPasswordSchema(t *testing.T) {
 
 func TestJWTValidMethods(t *testing.T) {
 
-	// JWTValidMethods restricts the parser to a fixed allow-list. We confirm
-	// the allow-list by parsing tokens signed with each method.
-	//
-	// NOTE: tools.go appends jwt.SigningMethodES384 (an asymmetric method)
-	// rather than the symmetric HS384, so HS384 tokens are NOT accepted. This
-	// looks like a copy/paste bug, but the test documents the current behavior.
+	// JWTValidMethods restricts the parser to a fixed allow-list of symmetric
+	// HMAC methods. We confirm the allow-list by parsing tokens signed with
+	// each method.
 	option := JWTValidMethods()
 
 	parser := jwt.NewParser(option)
@@ -91,15 +88,18 @@ func TestJWTValidMethods(t *testing.T) {
 		return signed
 	}
 
-	// HS256 and HS512 are accepted.
-	for _, method := range []jwt.SigningMethod{jwt.SigningMethodHS256, jwt.SigningMethodHS512} {
+	// HS256, HS384, and HS512 are all accepted.
+	for _, method := range []jwt.SigningMethod{jwt.SigningMethodHS256, jwt.SigningMethodHS384, jwt.SigningMethodHS512} {
 		_, err := parser.Parse(sign(method), func(*jwt.Token) (any, error) { return key, nil })
 		require.Nil(t, err, "method %s should be allowed", method.Alg())
 	}
 
-	// HS384 is NOT in the allow-list and must be rejected.
-	_, err := parser.Parse(sign(jwt.SigningMethodHS384), func(*jwt.Token) (any, error) { return key, nil })
-	require.NotNil(t, err, "HS384 should be rejected by the allow-list")
+	// An unapproved method (e.g. "none") must be rejected.
+	noneToken := jwt.NewWithClaims(jwt.SigningMethodNone, jwt.MapClaims{"sub": "1"})
+	noneString, err := noneToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
+	require.Nil(t, err)
+	_, err = parser.Parse(noneString, func(*jwt.Token) (any, error) { return jwt.UnsafeAllowNoneSignatureType, nil })
+	require.NotNil(t, err, "the 'none' algorithm must be rejected by the allow-list")
 }
 
 func TestCookieName(t *testing.T) {
