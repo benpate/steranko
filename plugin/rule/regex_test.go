@@ -62,3 +62,31 @@ func TestCountSymbol(t *testing.T) {
 	assert.Equal(t, 3, CountSymbols(")(*"))
 	assert.Equal(t, 32, CountSymbols("`~!@#$%^&*()_-+={[}]|:;'<,>.?/)"+`"`))
 }
+
+// FuzzCount confirms that the character-counting helpers never panic, never
+// return a negative count, and never report more matches than there are bytes
+// in the input. It also confirms the four categories never overlap-count more
+// than the total length.
+func FuzzCount(f *testing.F) {
+
+	f.Add("hello-there-123")
+	f.Add("")
+	f.Add("ABCdef!@#456")
+	f.Add("日本語")
+
+	f.Fuzz(func(t *testing.T, value string) {
+
+		digits := CountDigits(value)
+		upper := CountUppercase(value)
+		lower := CountLowercase(value)
+		symbols := CountSymbols(value)
+
+		for _, count := range []int{digits, upper, lower, symbols} {
+			assert.GreaterOrEqual(t, count, 0)
+			assert.LessOrEqual(t, count, len(value))
+		}
+
+		// The disjoint ASCII categories cannot sum to more than the byte length.
+		assert.LessOrEqual(t, digits+upper+lower+symbols, len(value))
+	})
+}

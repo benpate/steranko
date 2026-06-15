@@ -36,3 +36,42 @@ func TestContext(t *testing.T) {
 	require.Equal(t, "John Doe", authMap["name"])
 	require.Equal(t, "1234567890", authMap["sub"])
 }
+
+// TestContext_Cached confirms that Authorization caches the parsed claims and
+// returns the cached value without re-parsing.
+func TestContext_Cached(t *testing.T) {
+
+	cached := jwt.MapClaims{"username": "cached@example.com"}
+
+	// Pre-populate the cache. The request has no token, so if the cache were
+	// ignored, parsing would fail.
+	req := httptest.NewRequest("GET", "/", nil)
+	sterankoContext := Context{
+		Context:  echoContext(t, req),
+		steranko: getTestSteranko(),
+		claims:   cached,
+	}
+
+	auth, err := sterankoContext.Authorization()
+
+	require.Nil(t, err)
+	require.Equal(t, cached, auth)
+}
+
+// TestContext_Error confirms that a parsing error is wrapped and returned, and
+// that no claims are produced.
+func TestContext_Error(t *testing.T) {
+
+	req := httptest.NewRequest("GET", "/", nil)
+	req.AddCookie(&http.Cookie{Name: "Authorization", Value: "not-a-valid-token"})
+
+	sterankoContext := Context{
+		Context:  echoContext(t, req),
+		steranko: getTestSteranko(),
+	}
+
+	auth, err := sterankoContext.Authorization()
+
+	require.NotNil(t, err)
+	require.Nil(t, auth)
+}

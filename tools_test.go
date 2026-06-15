@@ -2,10 +2,15 @@ package steranko
 
 import (
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/stretchr/testify/require"
 
 	"github.com/benpate/rosetta/schema"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAuthenticate(t *testing.T) {
@@ -64,4 +69,119 @@ func TestPasswordSchema(t *testing.T) {
 	require.IsType(t, schema.String{}, sch.Element)
 	require.Equal(t, 0, sch.Element.(schema.String).MinLength)
 	require.Equal(t, 20, sch.Element.(schema.String).MaxLength)
+}
+
+func TestJWTValidMethods(t *testing.T) {
+
+	// JWTValidMethods restricts the parser to a fixed allow-list. We confirm
+	// the allow-list by parsing tokens signed with each method.
+	//
+	// NOTE: tools.go appends jwt.SigningMethodES384 (an asymmetric method)
+	// rather than the symmetric HS384, so HS384 tokens are NOT accepted. This
+	// looks like a copy/paste bug, but the test documents the current behavior.
+	option := JWTValidMethods()
+
+	parser := jwt.NewParser(option)
+	key := []byte("secret")
+
+	sign := func(method jwt.SigningMethod) string {
+		token := jwt.NewWithClaims(method, jwt.MapClaims{"sub": "1"})
+		signed, err := token.SignedString(key)
+		require.Nil(t, err)
+		return signed
+	}
+
+	// HS256 and HS512 are accepted.
+	for _, method := range []jwt.SigningMethod{jwt.SigningMethodHS256, jwt.SigningMethodHS512} {
+		_, err := parser.Parse(sign(method), func(*jwt.Token) (any, error) { return key, nil })
+		require.Nil(t, err, "method %s should be allowed", method.Alg())
+	}
+
+	// HS384 is NOT in the allow-list and must be rejected.
+	_, err := parser.Parse(sign(jwt.SigningMethodHS384), func(*jwt.Token) (any, error) { return key, nil })
+	require.NotNil(t, err, "HS384 should be rejected by the allow-list")
+}
+
+func TestCookieName(t *testing.T) {
+
+	// Non-TLS requests use the plain "Authorization" cookie name.
+	require.Equal(t, "Authorization", cookieName(httptest.NewRequest(http.MethodGet, "http://example.com/", nil)))
+
+	// TLS requests use the host-locked "__Host-Authorization" cookie name.
+	require.Equal(t, "__Host-Authorization", cookieName(httptest.NewRequest(http.MethodGet, "https://example.com/", nil)))
+}
+
+func TestIsTLS(t *testing.T) {
+
+	require.False(t, isTLS(httptest.NewRequest(http.MethodGet, "http://example.com/", nil)))
+	require.True(t, isTLS(httptest.NewRequest(http.MethodGet, "https://example.com/", nil)))
+}
+
+func TestCopyCookie(t *testing.T) {
+
+	// copyCookie must produce a value-equal copy of every relevant field.
+	original := &http.Cookie{
+		Name:     "Authorization",
+		Value:    "token-value",
+		MaxAge:   1234,
+		Domain:   "example.com",
+		Path:     "/path",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	clone := copyCookie(original)
+
+	require.Equal(t, original.Name, clone.Name)
+	require.Equal(t, original.Value, clone.Value)
+	require.Equal(t, original.MaxAge, clone.MaxAge)
+	require.Equal(t, original.Domain, clone.Domain)
+	require.Equal(t, original.Path, clone.Path)
+	require.Equal(t, original.HttpOnly, clone.HttpOnly)
+	require.Equal(t, original.Secure, clone.Secure)
+	require.Equal(t, original.SameSite, clone.SameSite)
+}
+
+func TestPushCookie(t *testing.T) {
+
+	// When an existing cookie is present, pushCookie should move it to a
+	// "-backup" cookie before writing the new value.
+	{
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.AddCookie(&http.Cookie{Name: "Authorization", Value: "original-token"})
+		ctx, rec := echoContextWithRecorder(t, req)
+
+		pushCookie(ctx, http.Cookie{Name: "Authorization", Value: "new-token"})
+
+		cookies := rec.Result().Cookies()
+		require.Equal(t, "new-token", findCookie(t, cookies, "Authorization").Value)
+		require.Equal(t, "original-token", findCookie(t, cookies, "Authorization-backup").Value)
+	}
+
+	// When there is no existing cookie, only the new cookie is written (no
+	// backup is created).
+	{
+		ctx, rec := echoContextWithRecorder(t, httptest.NewRequest(http.MethodGet, "/", nil))
+
+		pushCookie(ctx, http.Cookie{Name: "Authorization", Value: "new-token"})
+
+		cookies := rec.Result().Cookies()
+		require.Equal(t, "new-token", findCookie(t, cookies, "Authorization").Value)
+		require.Nil(t, findCookie(t, cookies, "Authorization-backup"))
+	}
+}
+
+func TestSleepRandom(t *testing.T) {
+
+	// sleepRandom must always sleep at least the minimum duration, and the
+	// degenerate min==max case must not panic (rand.Intn requires a positive
+	// argument, which the +1 guarantees).
+	require.NotPanics(t, func() {
+		sleepRandom(1, 1)
+	})
+
+	start := time.Now()
+	sleepRandom(10, 20)
+	require.GreaterOrEqual(t, time.Since(start), 10*time.Millisecond)
 }
