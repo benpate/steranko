@@ -16,7 +16,7 @@ func (bc BCrypt) ID() string {
 }
 
 // HashPassword returns a hashed value for the password.
-func (bc BCrypt) HashPassword(plaintext string) (hashedValue string, error error) {
+func (bc BCrypt) HashPassword(plaintext string) (hashedValue string, err error) {
 
 	// Trim password to 72 characters, which is the maximum length that bcrypt will accept.
 	// https://pkg.go.dev/golang.org/x/crypto/bcrypt#GenerateFromPassword
