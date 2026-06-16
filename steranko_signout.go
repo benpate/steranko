@@ -39,7 +39,7 @@ func (s *Steranko) SignOut(ctx echo.Context) bool {
 	ctx.SetCookie(&http.Cookie{
 		Name:     deleteName,              // Get the Cookie name to use for this context.
 		Value:    "",                      // Erase the value of the cookie
-		MaxAge:   0,                       // Expires the cookie immediately
+		MaxAge:   -1,                      // Negative Max-Age expires the cookie immediately (0 would omit the attribute)
 		Path:     "/",                     // This allows the cookie on all paths of this site.
 		Secure:   ctx.IsTLS(),             // Set secure cookies if we're on a secure connection
 		HttpOnly: true,                    // Cookies should only be accessible via HTTPS (not client-side scripts)

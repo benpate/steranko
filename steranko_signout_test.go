@@ -22,12 +22,12 @@ func TestSignOut_NoBackup(t *testing.T) {
 
 	require.False(t, hasBackup)
 
-	// The Authorization cookie should be cleared (empty value). The source sets
-	// MaxAge:0, which net/http encodes as "no Max-Age attribute".
+	// The Authorization cookie should be cleared (empty value) and expired
+	// immediately (negative Max-Age).
 	cookie := findCookie(t, rec.Result().Cookies(), "Authorization")
 	require.NotNil(t, cookie)
 	require.Empty(t, cookie.Value)
-	require.Equal(t, 0, cookie.MaxAge)
+	require.True(t, cookie.MaxAge < 0)
 	require.Equal(t, http.SameSiteStrictMode, cookie.SameSite)
 	require.True(t, cookie.HttpOnly)
 }
@@ -54,11 +54,11 @@ func TestSignOut_WithBackup(t *testing.T) {
 	require.NotNil(t, restored)
 	require.Equal(t, "previous-token", restored.Value)
 
-	// The backup cookie must be deleted (cleared to an empty value).
+	// The backup cookie must be deleted (cleared and expired).
 	deletedBackup := findCookie(t, cookies, "Authorization-backup")
 	require.NotNil(t, deletedBackup)
 	require.Empty(t, deletedBackup.Value)
-	require.Equal(t, 0, deletedBackup.MaxAge)
+	require.True(t, deletedBackup.MaxAge < 0)
 }
 
 // TestSignOut_EmptyBackup confirms that an empty backup cookie is ignored (it
@@ -80,7 +80,7 @@ func TestSignOut_EmptyBackup(t *testing.T) {
 	primary := findCookie(t, rec.Result().Cookies(), "Authorization")
 	require.NotNil(t, primary)
 	require.Empty(t, primary.Value)
-	require.Equal(t, 0, primary.MaxAge)
+	require.True(t, primary.MaxAge < 0)
 }
 
 // TestSignOut_TLS confirms the deleted cookie is marked Secure on a TLS request.
