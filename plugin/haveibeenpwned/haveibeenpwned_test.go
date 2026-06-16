@@ -12,6 +12,7 @@ func TestHavedIBeenPwned(t *testing.T) {
 
 	api := API{}
 
+	assert.Equal(t, "HaveIBeenPwned", api.ID())
 	assert.Equal(t, "Password can not appear on previously breached websites.  Visit https://haveibeenpwned.com for more info.", api.PasswordRuleDescription())
 
 	// One unique generated password, and apparently, Troubador73 doesn't show up in the password lists!!!
