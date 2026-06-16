@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMinLowercase_Name(t *testing.T) {
-	assert.Equal(t, "MinLowercase", MinLowercase(3).Name())
+func TestMinLowercase_ID(t *testing.T) {
+	assert.Equal(t, "MinLowercase", MinLowercase(3).ID())
 }
 
 func TestMinLowercase_ValidatePassword(t *testing.T) {
@@ -15,7 +15,7 @@ func TestMinLowercase_ValidatePassword(t *testing.T) {
 	rule := MinLowercase(3)
 
 	run := func(password string, expectedOK bool) {
-		ok, message := rule.ValidatePassword(password, "en")
+		ok, message := rule.ValidatePassword(password)
 		assert.Equal(t, expectedOK, ok, "password %q", password)
 		if expectedOK {
 			assert.Equal(t, "", message)
@@ -39,6 +39,6 @@ func TestMinLowercase_Messages(t *testing.T) {
 
 	assert.Equal(t, "Must be at least %i characters long.3", MinLowercase(3).PasswordRuleDescription("en"))
 
-	_, message := MinLowercase(3).ValidatePassword("AB", "en")
+	_, message := MinLowercase(3).ValidatePassword("AB")
 	assert.Equal(t, "Password must be at least %i characters long3", message)
 }

@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMinDigits_Name(t *testing.T) {
-	assert.Equal(t, "MinDigits", MinDigits(3).Name())
+func TestMinDigits_ID(t *testing.T) {
+	assert.Equal(t, "MinDigits", MinDigits(3).ID())
 }
 
 // TestMinDigits_ValidatePassword exercises the (correct) counting logic: a
@@ -18,7 +18,7 @@ func TestMinDigits_ValidatePassword(t *testing.T) {
 
 	// run asserts the OK result for a given password.
 	run := func(password string, expectedOK bool) {
-		ok, message := rule.ValidatePassword(password, "en")
+		ok, message := rule.ValidatePassword(password)
 		assert.Equal(t, expectedOK, ok, "password %q", password)
 		if expectedOK {
 			assert.Equal(t, "", message)
@@ -36,7 +36,7 @@ func TestMinDigits_ValidatePassword(t *testing.T) {
 
 	// A rule of zero accepts any password.
 	zero := MinDigits(0)
-	ok, message := zero.ValidatePassword("no-digits-here", "en")
+	ok, message := zero.ValidatePassword("no-digits-here")
 	assert.True(t, ok)
 	assert.Equal(t, "", message)
 }
@@ -49,6 +49,6 @@ func TestMinDigits_Messages(t *testing.T) {
 
 	assert.Equal(t, "Must be at least %i characters long.3", MinDigits(3).PasswordRuleDescription("en"))
 
-	_, message := MinDigits(3).ValidatePassword("", "en")
+	_, message := MinDigits(3).ValidatePassword("")
 	assert.Equal(t, "Password must be at least %i characters long3", message)
 }

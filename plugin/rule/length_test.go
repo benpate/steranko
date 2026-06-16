@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLength_Name(t *testing.T) {
-	assert.Equal(t, "MinLength", MinLength(0).Name())
-	assert.Equal(t, "MinLength", MinLength(20).Name())
+func TestLength_ID(t *testing.T) {
+	assert.Equal(t, "MinLength", MinLength(0).ID())
+	assert.Equal(t, "MinLength", MinLength(20).ID())
 }
 
 func TestLength(t *testing.T) {
@@ -26,7 +26,7 @@ func TestLength(t *testing.T) {
 
 	// Empty Password
 	{
-		ok, message := plugin0.ValidatePassword("", "en")
+		ok, message := plugin0.ValidatePassword("")
 
 		assert.True(t, ok)
 		assert.Equal(t, "", message)
@@ -34,19 +34,19 @@ func TestLength(t *testing.T) {
 
 	// 1 Char Password
 	{
-		ok, message := plugin1.ValidatePassword("", "en")
+		ok, message := plugin1.ValidatePassword("")
 
 		assert.False(t, ok)
 		assert.Equal(t, "Password must be at least 1 characters long", message)
 	}
 	{
-		ok, message := plugin1.ValidatePassword("x", "en")
+		ok, message := plugin1.ValidatePassword("x")
 
 		assert.True(t, ok)
 		assert.Equal(t, "", message)
 	}
 	{
-		ok, message := plugin1.ValidatePassword("xx", "en")
+		ok, message := plugin1.ValidatePassword("xx")
 
 		assert.True(t, ok)
 		assert.Equal(t, "", message)
@@ -59,7 +59,7 @@ func TestLength(t *testing.T) {
 		for x := 1; x < 30; x = x + 1 {
 			testValue = testValue + "a"
 
-			ok, message := plugin20.ValidatePassword(testValue, "en") // nolint:scopeguard readability
+			ok, message := plugin20.ValidatePassword(testValue) // nolint:scopeguard readability
 
 			if x < 20 {
 				assert.False(t, ok)
