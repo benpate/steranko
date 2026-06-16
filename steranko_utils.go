@@ -105,8 +105,19 @@ func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (matche
 func (s *Steranko) decoyPasswordHash() string {
 
 	s.decoyOnce.Do(func() {
-		// The plaintext is irrelevant; it only needs to produce a valid hash.
-		if hashed, err := s.getPasswordHasher().HashPassword("steranko-decoy-password"); err == nil {
+
+		const decoyPlaintext = "steranko-decoy-password" // value is irrelevant; we only need a valid hash
+
+		// Prefer the configured primary hasher so the decoy comparison costs the same as a real one.
+		if hashed, err := s.getPasswordHasher().HashPassword(decoyPlaintext); err == nil {
+			s.decoyHash = hashed
+			return
+		}
+
+		// Fall back to the default hasher so a failed primary hasher cannot
+		// leave us with an empty decoy (which would skip the timing-equalizing
+		// comparison and re-open the username-enumeration side-channel).
+		if hashed, err := defaultPasswordHasher().HashPassword(decoyPlaintext); err == nil {
 			s.decoyHash = hashed
 		}
 	})

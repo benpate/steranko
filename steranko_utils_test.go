@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/benpate/derp"
@@ -26,6 +27,20 @@ func (h countingHasher) HashPassword(plaintext string) (string, error) {
 func (h countingHasher) CompareHashedPassword(hashedValue string, plaintext string) (bool, bool) {
 	*h.compares++
 	return hashedValue == "hashed:"+plaintext, false
+}
+
+// failHashHasher is a test PasswordHasher whose HashPassword always fails, used
+// to exercise the decoy-hash fallback path.
+type failHashHasher struct{}
+
+func (failHashHasher) ID() string { return "fail-hash" }
+
+func (failHashHasher) HashPassword(plaintext string) (string, error) {
+	return "", errors.New("cannot hash")
+}
+
+func (failHashHasher) CompareHashedPassword(hashedValue string, plaintext string) (bool, bool) {
+	return false, false
 }
 
 func TestSetPassword(t *testing.T) {
@@ -181,4 +196,14 @@ func TestDecoyPasswordHash(t *testing.T) {
 	// The decoy must not accidentally validate a real password.
 	ok, _ := s.ComparePassword("any-password", first)
 	require.False(t, ok)
+}
+
+// TestDecoyPasswordHash_FallbackOnHasherFailure confirms that a primary hasher
+// which cannot produce a hash still yields a (default-hashed) decoy, so the
+// timing-equalizing comparison is never skipped.
+func TestDecoyPasswordHash_FallbackOnHasherFailure(t *testing.T) {
+
+	s := New(getTestUserService(), getTestKeyService(), WithPasswordHasher(failHashHasher{}))
+
+	require.NotEmpty(t, s.decoyPasswordHash(), "decoy must fall back to a valid hash when the primary hasher fails")
 }
