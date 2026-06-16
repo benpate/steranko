@@ -18,7 +18,7 @@ type rejectAllRule struct{}
 
 func (rejectAllRule) ID() string { return "reject-all" }
 
-func (rejectAllRule) PasswordRuleDescription(language string) string { return "nothing is allowed" }
+func (rejectAllRule) PasswordRuleDescription() string { return "nothing is allowed" }
 
 func (rejectAllRule) ValidatePassword(password string) (bool, string) {
 	return false, "rejected by rule"
@@ -30,7 +30,7 @@ type allowAllRule struct{}
 
 func (allowAllRule) ID() string { return "allow-all" }
 
-func (allowAllRule) PasswordRuleDescription(language string) string { return "everything is allowed" }
+func (allowAllRule) PasswordRuleDescription() string { return "everything is allowed" }
 
 func (allowAllRule) ValidatePassword(password string) (bool, string) { return true, "" }
 

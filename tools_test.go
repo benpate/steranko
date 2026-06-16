@@ -173,7 +173,11 @@ func TestPushCookie(t *testing.T) {
 		pushCookie(ctx, http.Cookie{Name: "Authorization", Value: "new-token"})
 
 		cookies := rec.Result().Cookies()
-		require.Equal(t, "new-token", findCookie(t, cookies, "Authorization").Value)
+
+		authCookie := findCookie(t, cookies, "Authorization")
+		require.NotNil(t, authCookie)
+		require.Equal(t, "new-token", authCookie.Value)
+
 		require.Nil(t, findCookie(t, cookies, "Authorization-backup"))
 	}
 }
