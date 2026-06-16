@@ -61,10 +61,10 @@ func (bc BCrypt) CompareHashedPassword(hashedValue string, plaintext string) (OK
 	return true, false
 }
 
-func maxlength(value string, max int) string {
+func maxlength(value string, limit int) string {
 
-	if len(value) > max {
-		return value[:max]
+	if len(value) > limit {
+		return value[:limit]
 	}
 
 	return value

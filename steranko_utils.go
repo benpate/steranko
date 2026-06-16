@@ -76,7 +76,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 // then this returns TRUE, FALSE.  If the password matches any of THE BACKUP hashers,
 // then this returns TRUE, TRUE.  If the password does not match any of the hashers
 // then this returns FALSE, FALSE.
-func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (matches bool, update bool) {
+func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (bool, bool) {
 
 	// Try each hashing algorithm in order.
 	for index, passwordHasher := range s.passwordHashers {
