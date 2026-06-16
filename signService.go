@@ -21,10 +21,13 @@ type SigninService interface {
 // It can be used as a default or placeholder implementation when no actual signin service is needed.
 type NilSigninService struct{}
 
+// SigninSuccess does nothing.
 func (s NilSigninService) SigninSuccess(request *http.Request, username string) {}
 
+// SigninFailure does nothing.
 func (s NilSigninService) SigninFailure(request *http.Request, username string) {}
 
+// IsSigninLocked always reports that the account is not locked.
 func (s NilSigninService) IsSigninLocked(request *http.Request, username string) bool {
 	return false
 }
