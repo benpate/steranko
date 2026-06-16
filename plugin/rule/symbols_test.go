@@ -37,12 +37,10 @@ func TestMinSymbols_ValidatePassword(t *testing.T) {
 	assert.Equal(t, "", message)
 }
 
-// TestMinSymbols_Messages documents the CURRENT (buggy) "%i" output. See the
-// note in digits_test.go.
 func TestMinSymbols_Messages(t *testing.T) {
 
-	assert.Equal(t, "Must be at least %i characters long.2", MinSymbols(2).PasswordRuleDescription("en"))
+	assert.Equal(t, "Must contain at least 2 symbols", MinSymbols(2).PasswordRuleDescription("en"))
 
 	_, message := MinSymbols(2).ValidatePassword("abc")
-	assert.Equal(t, "Password must be at least %i characters long2", message)
+	assert.Equal(t, "Password must contain at least 2 symbols", message)
 }

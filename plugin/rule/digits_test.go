@@ -41,14 +41,10 @@ func TestMinDigits_ValidatePassword(t *testing.T) {
 	assert.Equal(t, "", message)
 }
 
-// TestMinDigits_Messages documents the CURRENT (buggy) human-readable strings.
-// They use fmt.Sprint with a non-functional "%i" verb, so the rule count is
-// appended rather than interpolated. These assertions exist to flag the change
-// when the formatting bug is fixed.
 func TestMinDigits_Messages(t *testing.T) {
 
-	assert.Equal(t, "Must be at least %i characters long.3", MinDigits(3).PasswordRuleDescription("en"))
+	assert.Equal(t, "Must contain at least 3 digits", MinDigits(3).PasswordRuleDescription("en"))
 
 	_, message := MinDigits(3).ValidatePassword("")
-	assert.Equal(t, "Password must be at least %i characters long3", message)
+	assert.Equal(t, "Password must contain at least 3 digits", message)
 }

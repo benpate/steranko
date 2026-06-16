@@ -2,7 +2,7 @@ package rule
 
 import "fmt"
 
-// MinSymbols is a Plugin that validates the minimum length of passwords
+// MinSymbols is a Plugin that validates the minimum number of symbols in a password.
 type MinSymbols int
 
 // ID returns a string that uniquely identifies this plugin.
@@ -13,7 +13,7 @@ func (rule MinSymbols) ID() string {
 // PasswordRuleDescription returns a localized, human-friendly description of the password rule.
 func (rule MinSymbols) PasswordRuleDescription(language string) string {
 
-	return fmt.Sprint("Must be at least %i characters long.", rule)
+	return fmt.Sprintf("Must contain at least %d symbols", int(rule))
 }
 
 // ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaining the problem.
@@ -23,5 +23,5 @@ func (rule MinSymbols) ValidatePassword(password string) (OK bool, message strin
 		return true, ""
 	}
 
-	return false, fmt.Sprint("Password must be at least %i characters long", rule)
+	return false, fmt.Sprintf("Password must contain at least %d symbols", int(rule))
 }

@@ -10,15 +10,13 @@ import (
 
 // Compile-time assertions that the bundled validators satisfy PasswordRule, so
 // that a signature drift between a plugin and the interface fails the build.
-//
-// NOTE: rule.MinComplexity is intentionally omitted — it does not yet implement
-// PasswordRuleDescription or ValidatePassword.
 var (
 	_ PasswordRule = rule.MinLength(0)
 	_ PasswordRule = rule.MinDigits(0)
 	_ PasswordRule = rule.MinLowercase(0)
 	_ PasswordRule = rule.MinUppercase(0)
 	_ PasswordRule = rule.MinSymbols(0)
+	_ PasswordRule = rule.MinComplexity(0)
 	_ PasswordRule = &haveibeenpwned.API{}
 )
 
