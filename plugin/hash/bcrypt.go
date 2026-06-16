@@ -1,3 +1,4 @@
+// Package hash provides password hashing algorithm plugins for Steranko.
 package hash
 
 import (

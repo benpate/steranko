@@ -39,7 +39,7 @@ func TestMinSymbols_ValidatePassword(t *testing.T) {
 
 func TestMinSymbols_Messages(t *testing.T) {
 
-	assert.Equal(t, "Must contain at least 2 symbols", MinSymbols(2).PasswordRuleDescription("en"))
+	assert.Equal(t, "Must contain at least 2 symbols", MinSymbols(2).PasswordRuleDescription())
 
 	_, message := MinSymbols(2).ValidatePassword("abc")
 	assert.Equal(t, "Password must contain at least 2 symbols", message)

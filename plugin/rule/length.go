@@ -10,8 +10,8 @@ func (rule MinLength) ID() string {
 	return "MinLength"
 }
 
-// PasswordRuleDescription returns a localized, human-friendly description of the password rule.
-func (rule MinLength) PasswordRuleDescription(language string) string {
+// PasswordRuleDescription returns a human-friendly description of the password rule.
+func (rule MinLength) PasswordRuleDescription() string {
 
 	return fmt.Sprintf("Must be at least %d characters long", rule)
 }

@@ -12,8 +12,8 @@ func (rule MinLowercase) ID() string {
 	return "MinLowercase"
 }
 
-// PasswordRuleDescription returns a localized, human-friendly description of the password rule.
-func (rule MinLowercase) PasswordRuleDescription(language string) string {
+// PasswordRuleDescription returns a human-friendly description of the password rule.
+func (rule MinLowercase) PasswordRuleDescription() string {
 
 	return fmt.Sprintf("Must contain at least %d lowercase letters", int(rule))
 }

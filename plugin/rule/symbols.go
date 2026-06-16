@@ -10,8 +10,8 @@ func (rule MinSymbols) ID() string {
 	return "MinSymbols"
 }
 
-// PasswordRuleDescription returns a localized, human-friendly description of the password rule.
-func (rule MinSymbols) PasswordRuleDescription(language string) string {
+// PasswordRuleDescription returns a human-friendly description of the password rule.
+func (rule MinSymbols) PasswordRuleDescription() string {
 
 	return fmt.Sprintf("Must contain at least %d symbols", int(rule))
 }

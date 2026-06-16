@@ -19,9 +19,9 @@ func TestLength(t *testing.T) {
 
 	// Password Rule Descriptions
 	{
-		assert.Equal(t, "Must be at least 0 characters long", plugin0.PasswordRuleDescription("en"))
-		assert.Equal(t, "Must be at least 1 characters long", plugin1.PasswordRuleDescription("en"))
-		assert.Equal(t, "Must be at least 20 characters long", plugin20.PasswordRuleDescription("en"))
+		assert.Equal(t, "Must be at least 0 characters long", plugin0.PasswordRuleDescription())
+		assert.Equal(t, "Must be at least 1 characters long", plugin1.PasswordRuleDescription())
+		assert.Equal(t, "Must be at least 20 characters long", plugin20.PasswordRuleDescription())
 	}
 
 	// Empty Password

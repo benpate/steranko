@@ -155,8 +155,14 @@ func TestPushCookie(t *testing.T) {
 		pushCookie(ctx, http.Cookie{Name: "Authorization", Value: "new-token"})
 
 		cookies := rec.Result().Cookies()
-		require.Equal(t, "new-token", findCookie(t, cookies, "Authorization").Value)
-		require.Equal(t, "original-token", findCookie(t, cookies, "Authorization-backup").Value)
+
+		authCookie := findCookie(t, cookies, "Authorization")
+		require.NotNil(t, authCookie)
+		require.Equal(t, "new-token", authCookie.Value)
+
+		backupCookie := findCookie(t, cookies, "Authorization-backup")
+		require.NotNil(t, backupCookie)
+		require.Equal(t, "original-token", backupCookie.Value)
 	}
 
 	// When there is no existing cookie, only the new cookie is written (no

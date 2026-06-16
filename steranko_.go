@@ -1,3 +1,6 @@
+// Package steranko provides embeddable user authentication and authorization
+// for Go web applications, including password hashing, validation rules, and
+// JWT-based session cookies.
 package steranko
 
 import (

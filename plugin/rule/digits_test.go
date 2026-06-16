@@ -43,7 +43,7 @@ func TestMinDigits_ValidatePassword(t *testing.T) {
 
 func TestMinDigits_Messages(t *testing.T) {
 
-	assert.Equal(t, "Must contain at least 3 digits", MinDigits(3).PasswordRuleDescription("en"))
+	assert.Equal(t, "Must contain at least 3 digits", MinDigits(3).PasswordRuleDescription())
 
 	_, message := MinDigits(3).ValidatePassword("")
 	assert.Equal(t, "Password must contain at least 3 digits", message)

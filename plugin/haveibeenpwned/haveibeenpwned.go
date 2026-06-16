@@ -1,3 +1,5 @@
+// Package haveibeenpwned provides a Steranko password rule that rejects
+// passwords found in known data breaches, via the HaveIBeenPwned.com API.
 package haveibeenpwned
 
 import (
@@ -18,12 +20,12 @@ func (api *API) ID() string {
 	return "HaveIBeenPwned"
 }
 
-// PasswordRuleDescription returns a localized, human-friendly description of the password rule.
-func (api *API) PasswordRuleDescription(language string) string {
+// PasswordRuleDescription returns a human-friendly description of the password rule.
+func (api *API) PasswordRuleDescription() string {
 	return "Password can not appear on previously breached websites.  Visit https://haveibeenpwned.com for more info."
 }
 
-// ValidatePassword verifies that a password matches a rule, or returns a localized, human-friendly error message explaining the problem.
+// ValidatePassword verifies that a password matches a rule, or returns a human-friendly error message explaining the problem.
 func (api *API) ValidatePassword(password string) (OK bool, message string) {
 
 	// Use SHA1 and Base64 encoding to hash the password.

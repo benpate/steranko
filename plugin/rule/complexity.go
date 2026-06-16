@@ -1,3 +1,4 @@
+// Package rule provides password-complexity validation plugins for Steranko.
 package rule
 
 import (
@@ -13,8 +14,8 @@ func (rule MinComplexity) ID() string {
 	return "MinComplexity"
 }
 
-// PasswordRuleDescription returns a localized, human-friendly description of the password rule.
-func (rule MinComplexity) PasswordRuleDescription(language string) string {
+// PasswordRuleDescription returns a human-friendly description of the password rule.
+func (rule MinComplexity) PasswordRuleDescription() string {
 	return fmt.Sprintf("Must allow at least %d possible combinations", int64(rule))
 }
 

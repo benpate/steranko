@@ -12,8 +12,8 @@ func (rule MinDigits) ID() string {
 	return "MinDigits"
 }
 
-// PasswordRuleDescription returns a localized, human-friendly description of the password rule.
-func (rule MinDigits) PasswordRuleDescription(language string) string {
+// PasswordRuleDescription returns a human-friendly description of the password rule.
+func (rule MinDigits) PasswordRuleDescription() string {
 
 	return fmt.Sprintf("Must contain at least %d digits", int(rule))
 }

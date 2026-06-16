@@ -52,5 +52,5 @@ func TestMinComplexity_ValidatePassword(t *testing.T) {
 }
 
 func TestMinComplexity_PasswordRuleDescription(t *testing.T) {
-	assert.Equal(t, "Must allow at least 1000 possible combinations", MinComplexity(1000).PasswordRuleDescription("en"))
+	assert.Equal(t, "Must allow at least 1000 possible combinations", MinComplexity(1000).PasswordRuleDescription())
 }
