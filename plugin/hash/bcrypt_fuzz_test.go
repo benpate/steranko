@@ -113,12 +113,12 @@ func FuzzMaxlength(f *testing.F) {
 	f.Add("", 0)
 	f.Add("日本語のテキスト", 4)
 
-	f.Fuzz(func(t *testing.T, value string, max int) {
-		if max < 0 {
+	f.Fuzz(func(t *testing.T, value string, limit int) {
+		if limit < 0 {
 			t.Skip() // negative limits are not a supported input
 		}
-		result := maxlength(value, max)
-		require.LessOrEqual(t, len(result), max)
+		result := maxlength(value, limit)
+		require.LessOrEqual(t, len(result), limit)
 		require.LessOrEqual(t, len(result), len(value))
 	})
 }
