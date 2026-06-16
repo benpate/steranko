@@ -27,7 +27,7 @@ func New(userService UserService, keyService KeyService, options ...Option) *Ste
 		userService:     userService,
 		keyService:      keyService,
 		signinService:   NilSigninService{},
-		passwordHashers: []PasswordHasher{defaultPasswordHasher()}, // hash.Plaintext{},
+		passwordHashers: []PasswordHasher{defaultPasswordHasher()}, // use hash.Plaintext{} for testing and development
 		passwordSchema:  schema.New(schema.String{MinLength: 8, Required: true}),
 	}
 
