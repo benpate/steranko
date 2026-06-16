@@ -7,7 +7,7 @@ type PasswordHasher interface {
 	ID() string
 
 	// HashPassword returns a hashed value that can be (safely?) stored in a database
-	HashPassword(plaintext string) (ciphertext string, error error)
+	HashPassword(plaintext string) (ciphertext string, err error)
 
 	// CompareHashedValue checks that a plaintext value matches a stored ciphertext value.
 	// OK returns TRUE if the values match.  Rehash returns TRUE if the hashing criteria has been updated
