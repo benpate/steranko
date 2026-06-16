@@ -3,9 +3,30 @@ package steranko
 import (
 	"testing"
 
+	"github.com/benpate/derp"
 	"github.com/benpate/steranko/plugin/hash"
 	"github.com/stretchr/testify/require"
 )
+
+// countingHasher is a test PasswordHasher that records how many times it is
+// asked to hash or compare, so tests can assert that work happened without
+// relying on (flaky) wall-clock timing.
+type countingHasher struct {
+	hashes   *int
+	compares *int
+}
+
+func (countingHasher) ID() string { return "counting" }
+
+func (h countingHasher) HashPassword(plaintext string) (string, error) {
+	*h.hashes++
+	return "hashed:" + plaintext, nil
+}
+
+func (h countingHasher) CompareHashedPassword(hashedValue string, plaintext string) (bool, bool) {
+	*h.compares++
+	return hashedValue == "hashed:"+plaintext, false
+}
 
 func TestSetPassword(t *testing.T) {
 
@@ -118,4 +139,46 @@ func TestAuthenticate_UpgradesPassword(t *testing.T) {
 	ok, update := s.ComparePassword("plaintext-password", reloaded.GetPassword())
 	require.True(t, ok)
 	require.False(t, update, "after upgrade the password should match the primary hasher")
+}
+
+// TestAuthenticate_DecoyComparisonOnUnknownUser confirms that authenticating an
+// unknown user still performs a password comparison (against a decoy hash), so
+// the timing matches a real password check and usernames cannot be enumerated.
+func TestAuthenticate_DecoyComparisonOnUnknownUser(t *testing.T) {
+
+	var hashes, compares int
+	hasher := countingHasher{hashes: &hashes, compares: &compares}
+
+	s := New(getTestUserService(), getTestKeyService(), WithPasswordHasher(hasher))
+
+	// Authenticate a user that does not exist.
+	err := s.authenticate("nobody@nowhere.com", "any-password", s.userService.New())
+
+	require.NotNil(t, err)
+	require.True(t, derp.IsUnauthorized(err))
+	require.Equal(t, 1, hashes, "the decoy hash should be generated exactly once")
+	require.GreaterOrEqual(t, compares, 1, "a decoy comparison must run on the not-found path")
+
+	// A second unknown-user signin must reuse the cached decoy hash (no second
+	// hash generation) while still performing a comparison.
+	err = s.authenticate("also-nobody@nowhere.com", "any-password", s.userService.New())
+
+	require.NotNil(t, err)
+	require.Equal(t, 1, hashes, "the decoy hash must be cached, not regenerated")
+	require.GreaterOrEqual(t, compares, 2, "a decoy comparison must run on every not-found signin")
+}
+
+// TestDecoyPasswordHash confirms the decoy hash is non-empty, cached (stable
+// across calls), and a valid hash that does not match an arbitrary password.
+func TestDecoyPasswordHash(t *testing.T) {
+
+	s := New(getTestUserService(), getTestKeyService(), WithPasswordHasher(hash.BCrypt(4)))
+
+	first := s.decoyPasswordHash()
+	require.NotEmpty(t, first)
+	require.Equal(t, first, s.decoyPasswordHash(), "decoy hash must be stable across calls")
+
+	// The decoy must not accidentally validate a real password.
+	ok, _ := s.ComparePassword("any-password", first)
+	require.False(t, ok)
 }

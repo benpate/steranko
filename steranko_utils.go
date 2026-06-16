@@ -37,6 +37,12 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 	if err := s.userService.Load(username, user); err != nil {
 
 		if derp.IsNotFound(err) {
+
+			// Compare against a decoy hash so that a missing account takes the
+			// same time as a real password check. This prevents an attacker
+			// from enumerating valid usernames by measuring response times.
+			s.ComparePassword(password, s.decoyPasswordHash())
+
 			return derp.Unauthorized(location, "Unauthorized", username, "user not found")
 		}
 
@@ -90,6 +96,22 @@ func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (matche
 
 	// Boo!
 	return false, false
+}
+
+// decoyPasswordHash returns a throwaway hash, computed once with the primary
+// hasher and cached, that is used to keep the timing of a failed (user-not-found)
+// signin indistinguishable from a real password comparison. Using the primary
+// hasher ensures the decoy comparison costs the same as a genuine one.
+func (s *Steranko) decoyPasswordHash() string {
+
+	s.decoyOnce.Do(func() {
+		// The plaintext is irrelevant; it only needs to produce a valid hash.
+		if hashed, err := s.getPasswordHasher().HashPassword("steranko-decoy-password"); err == nil {
+			s.decoyHash = hashed
+		}
+	})
+
+	return s.decoyHash
 }
 
 // getPasswordHasher returns the "primary" PasswordHasher, which is

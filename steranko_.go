@@ -3,6 +3,7 @@ package steranko
 import (
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/benpate/derp"
 	"github.com/benpate/rosetta/schema"
@@ -18,6 +19,9 @@ type Steranko struct {
 	passwordSchema  schema.Schema    // Validating schema to use when setting new passwords.
 	passwordRules   []PasswordRule   // PasswordRules are additional validators that are applied to new passwords.
 	passwordHashers []PasswordHasher // PasswordHashers is a list of one-way encryption hashes that stored passwords.
+
+	decoyOnce sync.Once // guards the one-time computation of decoyHash
+	decoyHash string    // throwaway hash used to equalize the timing of failed signins (see decoyPasswordHash)
 }
 
 // New returns a fully initialized Steranko instance, with HandlerFuncs that support all of your user authentication and authorization needs.
