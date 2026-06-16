@@ -17,18 +17,22 @@ type SigninResponse struct {
 	Error        error
 }
 
+// RequestPasswordResetTransaction is the request body for initiating a password reset.
 type RequestPasswordResetTransaction struct {
-	Username string `json:"username" form:"userame"` // public username of the person requesting the reset.
+	Username string `json:"username" form:"username"` // public username of the person requesting the reset.
 }
 
+// RequestPasswordResetResponse is the response returned after a password reset request.
 type RequestPasswordResetResponse struct {
 }
 
+// UpdatePasswordTransaction is the request body for changing a user's password.
 type UpdatePasswordTransaction struct {
 	Username    string `json:"username"    form:"username"`
 	OldPassword string `json:"oldPassword" form:"oldPassword"`
 	NewPassword string `json:"newPassword" form:"newPassword"`
 }
 
+// UpdatePasswordResponse is the response returned after a password update.
 type UpdatePasswordResponse struct {
 }
