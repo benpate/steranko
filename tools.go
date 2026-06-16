@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// JWTValidmethods returns a jwt.ParserOption that restricts the JWT parser to only accept
-// secure encrytption methods defined inthe golang-jwt package.
+// JWTValidMethods returns a jwt.ParserOption that restricts the JWT parser to only accept
+// secure encryption methods defined in the golang-jwt package.
 // https://pkg.go.dev/github.com/golang-jwt/jwt/v5@v5.2.1#WithValidMethods
 func JWTValidMethods() jwt.ParserOption {
 

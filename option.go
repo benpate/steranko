@@ -4,6 +4,7 @@ import (
 	"github.com/benpate/rosetta/schema"
 )
 
+// Option is a functional option that configures a Steranko instance at construction time.
 type Option func(*Steranko)
 
 // WithPasswordSchema sets the provided schema.Schema as the validation
@@ -14,7 +15,7 @@ func WithPasswordSchema(passwordSchema schema.Schema) Option {
 	}
 }
 
-// WithPasswordRules appends the provided password rules the the
+// WithPasswordRules appends the provided password rules to the
 // list used when setting new passwords.
 func WithPasswordRules(passwordRules ...PasswordRule) Option {
 	return func(s *Steranko) {
@@ -22,10 +23,10 @@ func WithPasswordRules(passwordRules ...PasswordRule) Option {
 	}
 }
 
-// WithPasswordHashers sets the hashing algorithm(s) to use when
+// WithPasswordHasher sets the hashing algorithm(s) to use when
 // setting/validating passwords.  The first hasher in the list is
 // used to create new passwords.  All subsequent hashers are "deprecated"
-// and will be upgrated to the primary algorithm the next time the user
+// and will be upgraded to the primary algorithm the next time the user
 // signs in.
 func WithPasswordHasher(hashers ...PasswordHasher) Option {
 	return func(s *Steranko) {

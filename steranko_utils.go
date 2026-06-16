@@ -65,7 +65,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 	return nil
 }
 
-// comparePassword tries to validate the plaintext password and hashedValue using
+// ComparePassword tries to validate the plaintext password and hashedValue using
 // each of the password hashers in sequence.  If the password matches THE PRIMARY hasher,
 // then this returns TRUE, FALSE.  If the password matches any of THE BACKUP hashers,
 // then this returns TRUE, TRUE.  If the password does not match any of the hashers

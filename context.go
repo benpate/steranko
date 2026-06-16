@@ -14,7 +14,7 @@ type Context struct {
 }
 
 // Authorization retrieves the JWT token claims from the context.
-// Values are cached so we don't re-parse the JWT cookie with mutiple calls.
+// Values are cached so we don't re-parse the JWT cookie with multiple calls.
 func (ctx *Context) Authorization() (jwt.Claims, error) {
 
 	const location = "steranko.Context.Authorization"
