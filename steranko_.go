@@ -41,6 +41,11 @@ func New(userService UserService, keyService KeyService, options ...Option) *Ste
 }
 
 // WithOptions applies the provided Option functions to this Steranko instance.
+//
+// This mutates the instance without synchronization and is therefore NOT safe
+// to call concurrently with request handling. Apply all options during
+// construction (via New, or immediately after) before the Steranko is shared
+// across goroutines.
 func (s *Steranko) WithOptions(options ...Option) {
 	for _, option := range options {
 		option(s)
