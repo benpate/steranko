@@ -29,12 +29,10 @@ func FuzzFindAuthorization(f *testing.F) {
 		// Cookie path. Cookie values cannot contain arbitrary control
 		// characters, so only exercise values that the http package will
 		// accept. We still confirm the lookup never panics.
-		cookie := &http.Cookie{Name: "Authorization", Value: header}
-		if cookie.Valid() == nil {
+		if cookie := (&http.Cookie{Name: "Authorization", Value: header}); cookie.Valid() == nil {
 			req2 := httptest.NewRequest(http.MethodGet, "/", nil)
 			req2.AddCookie(cookie)
-			got := s.findAuthorization(req2)
-			if got != header {
+			if got := s.findAuthorization(req2); got != header {
 				t.Fatalf("cookie value round-trip mismatch: got %q want %q", got, header)
 			}
 		}
@@ -63,11 +61,9 @@ func FuzzGetAuthorization(f *testing.F) {
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.AddCookie(cookie)
 
-		claims, err := s.GetAuthorization(req)
-
 		// The security-critical invariant: we must never accept a token that
 		// the parser rejected (no claims without an error path having run).
-		if err == nil && claims == nil {
+		if claims, err := s.GetAuthorization(req); err == nil && claims == nil {
 			t.Fatalf("GetAuthorization returned nil claims AND nil error for token %q", token)
 		}
 	})
