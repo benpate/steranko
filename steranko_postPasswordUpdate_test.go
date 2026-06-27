@@ -15,51 +15,45 @@ func TestPostPasswordUpdate_Fail(t *testing.T) {
 
 	s := getTestSteranko()
 
-	// Mock Form Body
+	// A new password that violates the schema (too short) must be rejected.
 	transaction := make(url.Values)
 	transaction.Set("username", "andrew@jackson.com")
 	transaction.Set("oldPassword", "whitehouse")
 	transaction.Set("newPassword", "too-short")
 
-	// Create New HTTP Request
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(transaction.Encode()))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	c := e.NewContext(req, httptest.NewRecorder())
 
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	// Assertions
 	require.NotNil(t, s.PostPasswordUpdate(c))
-	// require.Equal(t, http.StatusBadRequest, rec.Code)
 
-	// Verify Password NOT changed
-	// s.UserService.Load("andrew@jackson.com", user)
+	// RULE: a rejected update must leave the stored password untouched.
+	user := s.userService.New()
+	require.NoError(t, s.userService.Load("andrew@jackson.com", user))
+	require.Equal(t, "whitehouse", user.GetPassword(), "password must not change when the update is rejected")
 }
 
 func TestPostPasswordUpdate_Success(t *testing.T) {
 
 	s := getTestSteranko()
 
-	// Mock Form Body
+	// A valid new password must be accepted and persisted.
 	transaction := make(url.Values)
 	transaction.Set("username", "andrew@jackson.com")
 	transaction.Set("oldPassword", "whitehouse")
 	transaction.Set("newPassword", "valid-password")
 
-	// Create New HTTP Request
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(transaction.Encode()))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	c := e.NewContext(req, httptest.NewRecorder())
 
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	// Assertions
 	require.Nil(t, s.PostPasswordUpdate(c))
-	require.Equal(t, http.StatusOK, rec.Code)
 
-	// Verify Password NOT changed
-	// s.UserService.Load("andrew@jackson.com")
-
+	// The stored password must now be the new value. (This Steranko uses the
+	// Plaintext hasher, so the stored ciphertext equals the plaintext.)
+	user := s.userService.New()
+	require.NoError(t, s.userService.Load("andrew@jackson.com", user))
+	require.Equal(t, "valid-password", user.GetPassword(), "password must be updated on success")
 }

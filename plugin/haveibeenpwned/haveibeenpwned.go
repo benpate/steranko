@@ -12,8 +12,16 @@ import (
 	"github.com/benpate/remote"
 )
 
+// defaultBaseURL is the production HaveIBeenPwned range endpoint. The 5-character
+// SHA-1 prefix is appended to this value.
+const defaultBaseURL = "https://api.pwnedpasswords.com/range/"
+
 // API represents the HaveIBeenPwned.com api, and manages all remote calls to this API to check for passwords that have appeared in previous data breaches.
-type API struct{}
+type API struct {
+	// BaseURL overrides the range endpoint. The zero value uses the production
+	// API; tests set it to a local server. It must end with a trailing slash.
+	BaseURL string
+}
 
 // ID returns a string that uniquely identifies this plugin.
 func (api *API) ID() string {
@@ -28,21 +36,16 @@ func (api *API) PasswordRuleDescription() string {
 // ValidatePassword verifies that a password matches a rule, or returns a human-friendly error message explaining the problem.
 func (api *API) ValidatePassword(password string) (OK bool, message string) {
 
-	// Use SHA1 and Base64 encoding to hash the password.
-	hashedBytes := sha1.Sum([]byte(password))
-	encoded := hex.EncodeToString(hashedBytes[:])
-	encoded = strings.ToUpper(encoded)
-
-	// Split the encoded value into prefix and suffix
-	prefix := encoded[:5]
-	suffix := encoded[5:] //nolint:scopeguard
+	// Hash the password and split it for the k-anonymity range query: only the
+	// 5-character prefix is ever sent; the suffix is matched locally.
+	prefix, suffix := hashAndSplit(password)
 
 	// Send the request to the remote API. The range endpoint returns only a few
 	// KB, so cap the response well below remote's 1GB default to bound memory
 	// against a hostile or malfunctioning server.
 	var response bytes.Buffer
 
-	transaction := remote.Get("https://api.pwnedpasswords.com/range/" + prefix).
+	transaction := remote.Get(api.baseURL() + prefix).
 		MaxResponseSize(1 << 20). // 1MB
 		Result(&response)
 
@@ -53,7 +56,32 @@ func (api *API) ValidatePassword(password string) (OK bool, message string) {
 		return true, ""
 	}
 
-	for scanner := bufio.NewScanner(&response); scanner.Scan(); {
+	return matchSuffix(&response, suffix)
+}
+
+// baseURL returns the configured range endpoint, defaulting to the production API.
+func (api *API) baseURL() string {
+	if api.BaseURL != "" {
+		return api.BaseURL
+	}
+
+	return defaultBaseURL
+}
+
+// hashAndSplit returns the uppercase hex SHA-1 of the password, split into the
+// 5-character range prefix and the remaining suffix used for local matching.
+func hashAndSplit(password string) (prefix string, suffix string) {
+	hashedBytes := sha1.Sum([]byte(password))
+	encoded := strings.ToUpper(hex.EncodeToString(hashedBytes[:]))
+
+	return encoded[:5], encoded[5:]
+}
+
+// matchSuffix scans a Pwned Passwords range response (lines of "SUFFIX:COUNT")
+// for the given hash suffix, returning whether the password is safe to use.
+func matchSuffix(response *bytes.Buffer, suffix string) (OK bool, message string) {
+
+	for scanner := bufio.NewScanner(response); scanner.Scan(); {
 		line := scanner.Text()
 		usedSuffix, useCount, _ := strings.Cut(line, ":") // nolint:scopeguard - readability
 
