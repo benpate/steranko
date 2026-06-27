@@ -10,15 +10,31 @@
 
 Steranko is an embeddable library that manages user authentication, and authorization.  You can configure it at run time (or compile time) to meet your specific project needs.
 
-To use Steranko, you only have to implement two interfaces in your code, then wire Steranko's handlers into your HTTP server.
+To use Steranko, you implement two interfaces in your code — a `UserService` (CRUD for your user records) and a `KeyService` (the keys that sign JWT tokens) — then wire Steranko's handlers into your HTTP server.
 
 ```go
-s := steranko.New(userService, steranko.Conig{
-    Tokens: "cookie:auth",
-    PasswordSchema: `{"type":"string", "minLength":20}`
+// userService and keyService are YOUR implementations of the
+// steranko.UserService and steranko.KeyService interfaces.
+s := steranko.New(
+    userService,
+    keyService,
+    steranko.WithPasswordSchema(schema.New(schema.String{MinLength: 20, Required: true})),
+    steranko.WithPasswordHasher(hash.BCrypt(15)),
+)
+
+// Wire the handlers into an Echo server.
+e := echo.New()
+e.POST("/signin", func(ctx echo.Context) error {
+    _, err := s.SigninFormPost(ctx)
+    return err
+})
+e.POST("/signout", func(ctx echo.Context) error {
+    s.SignOut(ctx)
+    return nil
 })
 
-s.Register(echo)
+// Protect routes with the middleware, then read the authenticated claims.
+e.GET("/profile", profileHandler, s.Middleware)
 ```
 
 ## DO NOT USE
@@ -51,6 +67,20 @@ This project is a work-in-progress, and should NOT be used by ANYONE, for ANY PU
   * Something to prevent requests from being forwarded to an actual human.
   * Math problems?
   * Geolocation.
+
+## What matters here
+
+- **`User.SetPassword` takes a *ciphertext*, never a plaintext.** The `User` interface stores whatever string it is handed. Always hash first by calling the `Steranko.SetPassword` helper (which runs the configured `PasswordHasher`); calling `user.SetPassword` with a raw password persists cleartext and breaks every later signin.
+
+- **The hasher list is ordered: index 0 is primary, the rest are deprecated.** A password matched by any non-primary hasher is transparently re-hashed with the primary on the next signin (the `Rehash`/upgrade path). This is how bcrypt cost upgrades roll out — keep old hashers in the list until every user has signed in.
+
+- **`hash.Plaintext` is for development only and silently makes hashing a no-op.** Because plaintext "hashes" equal the password, tests that use it cannot detect a missing-hash bug. Test hashing-sensitive code paths against `hash.BCrypt` instead.
+
+- **Failed signins are deliberately slow and constant-time.** `crypto/rand` jitter plus a cached decoy hash (`decoyPasswordHash`) keep a missing account indistinguishable from a wrong password, defeating username enumeration. Don't "optimize" these delays away.
+
+- **Cookie names depend on TLS.** Secure requests use the `__Host-Authorization` prefix (domain-locked, HTTPS-only); plain HTTP uses `Authorization`. Signin and signout must agree on the name, which is why both route through `cookieName`.
+
+- **JWT methods are allow-listed to HMAC only** (`JWTValidMethods`: HS256/384/512). This blocks the `alg:none` and algorithm-confusion attacks; don't widen it without reason.
 
 ## Pull Requests Welcome
 
