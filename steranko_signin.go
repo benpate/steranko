@@ -151,8 +151,10 @@ func (s *Steranko) ValidatePassword(plaintext string) error {
 
 	const location = "steranko.ValidatePassword"
 
-	// Validate the schema (size, composition, etc)
-	if err := s.passwordSchema.Validate(plaintext); err != nil {
+	// Validate the schema (size, composition, etc).
+	// The first return value reports whether Validate coerced the value; a
+	// password is checked, never mutated, so it is deliberately discarded.
+	if _, err := s.passwordSchema.Validate(plaintext); err != nil {
 		return derp.Wrap(err, location, "Password does not meet requirements")
 	}
 
