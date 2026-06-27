@@ -6,11 +6,11 @@ type PasswordHasher interface {
 	// ID returns a string that uniquely identifies this plugin.
 	ID() string
 
-	// HashPassword returns a hashed value that can be (safely?) stored in a database
+	// HashPassword returns a hashed value that can be safely stored in a database.
 	HashPassword(plaintext string) (ciphertext string, err error)
 
-	// CompareHashedValue checks that a plaintext value matches a stored ciphertext value.
-	// OK returns TRUE if the values match.  Rehash returns TRUE if the hashing criteria has been updated
-	// and a new hashed value should be stored in its place.
-	CompareHashedPassword(plaintext string, ciphertext string) (OK bool, Rehash bool)
+	// CompareHashedPassword checks that a plaintext password matches a stored ciphertext value.
+	// OK returns TRUE if the values match.  Rehash returns TRUE if the hashing criteria has
+	// changed and the password should be re-hashed and stored in its place.
+	CompareHashedPassword(ciphertext string, plaintext string) (OK bool, Rehash bool)
 }
