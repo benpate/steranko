@@ -26,6 +26,12 @@ func (t *testUserService) Load(username string, user User) error {
 	return err
 }
 
+// LoadBySubject keys on username, because the testUser uses its username as its
+// stable identifier (see testUser.ID).
+func (t *testUserService) LoadBySubject(subject string, user User) error {
+	return t.Load(subject, user)
+}
+
 func (t *testUserService) Save(user User, comment string) error {
 	return t.collection.Save(user.(data.Object), comment)
 }

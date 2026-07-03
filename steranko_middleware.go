@@ -12,6 +12,15 @@ func (s *Steranko) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		}
 
+		// Re-verify aged sessions against the UserService. An unauthenticated
+		// request has no claims to revalidate, so that case is skipped silently;
+		// a stale-but-revoked session is rejected here (fail closed).
+		if claims, err := s.GetAuthorization(ctx.Request()); err == nil {
+			if err := s.revalidate(ctx, claims); err != nil {
+				return err
+			}
+		}
+
 		return next(&Context{
 			Context:  ctx,
 			steranko: s,

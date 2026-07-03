@@ -1,6 +1,8 @@
 package steranko
 
 import (
+	"time"
+
 	"github.com/benpate/rosetta/schema"
 )
 
@@ -41,6 +43,16 @@ func WithPasswordHasher(hashers ...PasswordHasher) Option {
 func WithSigninService(service SigninService) Option {
 	return func(s *Steranko) {
 		s.signinService = service
+	}
+}
+
+// WithRevalidationInterval sets how old a token may be before Steranko
+// re-verifies it against the UserService on the next request. A re-verified
+// cookie session is re-minted (sliding window); a Bearer/header session is
+// re-checked but not re-issued. Default is 10 minutes.
+func WithRevalidationInterval(interval time.Duration) Option {
+	return func(s *Steranko) {
+		s.revalidationInterval = interval
 	}
 }
 

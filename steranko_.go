@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/benpate/derp"
 	"github.com/benpate/rosetta/schema"
@@ -14,14 +15,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// defaultRevalidationInterval is how old a token may be before Steranko
+// re-verifies it against the UserService on the next request.
+const defaultRevalidationInterval = 10 * time.Minute
+
 // Steranko contains all required configuration information for this library.
 type Steranko struct {
-	userService     UserService      // Service that provides CRUD operations on Users
-	signinService   SigninService    // Service that tracks signin successes and failures for users.
-	keyService      KeyService       // Service that generates/retrieves encryption keys used in JWT signatures.
-	passwordSchema  schema.Schema    // Validating schema to use when setting new passwords.
-	passwordRules   []PasswordRule   // PasswordRules are additional validators that are applied to new passwords.
-	passwordHashers []PasswordHasher // PasswordHashers is a list of one-way encryption hashes that stored passwords.
+	userService          UserService      // Service that provides CRUD operations on Users
+	signinService        SigninService    // Service that tracks signin successes and failures for users.
+	keyService           KeyService       // Service that generates/retrieves encryption keys used in JWT signatures.
+	passwordSchema       schema.Schema    // Validating schema to use when setting new passwords.
+	passwordRules        []PasswordRule   // PasswordRules are additional validators that are applied to new passwords.
+	passwordHashers      []PasswordHasher // PasswordHashers is a list of one-way encryption hashes that stored passwords.
+	revalidationInterval time.Duration    // How old a token may be before it is re-verified against the UserService.
 
 	decoyOnce sync.Once // guards the one-time computation of decoyHash
 	decoyHash string    // throwaway hash used to equalize the timing of failed signins (see decoyPasswordHash)
@@ -31,11 +37,12 @@ type Steranko struct {
 func New(userService UserService, keyService KeyService, options ...Option) *Steranko {
 
 	result := Steranko{
-		userService:     userService,
-		keyService:      keyService,
-		signinService:   NilSigninService{},
-		passwordHashers: []PasswordHasher{defaultPasswordHasher()}, // use hash.Plaintext{} for testing and development
-		passwordSchema:  schema.New(schema.String{MinLength: 8, Required: true}),
+		userService:          userService,
+		keyService:           keyService,
+		signinService:        NilSigninService{},
+		passwordHashers:      []PasswordHasher{defaultPasswordHasher()}, // use hash.Plaintext{} for testing and development
+		passwordSchema:       schema.New(schema.String{MinLength: 8, Required: true}),
+		revalidationInterval: defaultRevalidationInterval,
 	}
 
 	result.WithOptions(options...)

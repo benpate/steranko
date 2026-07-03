@@ -11,6 +11,12 @@ type UserService interface {
 	// Load retrieves a single User from the database
 	Load(username string, user User) error
 
+	// LoadBySubject retrieves a single User by the value stored in the token's
+	// standard "sub" claim. Steranko uses this to re-verify an existing session,
+	// so the subject should be a stable identifier (such as a primary key) that
+	// does not change when the user edits their username or email.
+	LoadBySubject(subject string, user User) error
+
 	// Save inserts/updates a single User in the database
 	Save(user User, comment string) error
 
