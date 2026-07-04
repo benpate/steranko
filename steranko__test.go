@@ -23,9 +23,9 @@ func TestNew_Defaults(t *testing.T) {
 
 	// There must always be at least one password hasher, and the default must
 	// NOT be plaintext (this is a security package).
-	require.Len(t, s.passwordHashers, 1)
-	require.NotEqual(t, "Plaintext", s.passwordHashers[0].ID())
-	require.Equal(t, "BCrypt", s.passwordHashers[0].ID())
+	require.Len(t, s.passwords.hashers, 1)
+	require.NotEqual(t, "Plaintext", s.passwords.hashers[0].ID())
+	require.Equal(t, "BCrypt", s.passwords.hashers[0].ID())
 
 	// The default schema requires a password of at least 8 characters.
 	require.NotNil(t, s.passwordSchema.Element)

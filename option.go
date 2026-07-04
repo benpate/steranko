@@ -32,7 +32,16 @@ func WithPasswordRules(passwordRules ...PasswordRule) Option {
 // signs in.
 func WithPasswordHasher(hashers ...PasswordHasher) Option {
 	return func(s *Steranko) {
-		s.passwordHashers = hashers
+		s.passwords = NewPasswordService(hashers...)
+	}
+}
+
+// WithPasswordService sets the PasswordService that owns the ordered chain of
+// hashers used to store and verify passwords.  Use this when the application
+// shares one PasswordService between Steranko and its own code.
+func WithPasswordService(passwords PasswordService) Option {
+	return func(s *Steranko) {
+		s.passwords = passwords
 	}
 }
 

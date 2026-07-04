@@ -21,13 +21,13 @@ const defaultRevalidationInterval = 10 * time.Minute
 
 // Steranko contains all required configuration information for this library.
 type Steranko struct {
-	userService          UserService      // Service that provides CRUD operations on Users
-	signinService        SigninService    // Service that tracks signin successes and failures for users.
-	keyService           KeyService       // Service that generates/retrieves encryption keys used in JWT signatures.
-	passwordSchema       schema.Schema    // Validating schema to use when setting new passwords.
-	passwordRules        []PasswordRule   // PasswordRules are additional validators that are applied to new passwords.
-	passwordHashers      []PasswordHasher // PasswordHashers is a list of one-way encryption hashes that stored passwords.
-	revalidationInterval time.Duration    // How old a token may be before it is re-verified against the UserService.
+	userService          UserService     // Service that provides CRUD operations on Users
+	signinService        SigninService   // Service that tracks signin successes and failures for users.
+	keyService           KeyService      // Service that generates/retrieves encryption keys used in JWT signatures.
+	passwordSchema       schema.Schema   // Validating schema to use when setting new passwords.
+	passwordRules        []PasswordRule  // PasswordRules are additional validators that are applied to new passwords.
+	passwords            PasswordService // PasswordService owns the ordered chain of hashers used to store and verify passwords.
+	revalidationInterval time.Duration   // How old a token may be before it is re-verified against the UserService.
 
 	decoyOnce sync.Once // guards the one-time computation of decoyHash
 	decoyHash string    // throwaway hash used to equalize the timing of failed signins (see decoyPasswordHash)
@@ -40,7 +40,7 @@ func New(userService UserService, keyService KeyService, options ...Option) *Ste
 		userService:          userService,
 		keyService:           keyService,
 		signinService:        NilSigninService{},
-		passwordHashers:      []PasswordHasher{defaultPasswordHasher()}, // use hash.Plaintext{} for testing and development
+		passwords:            NewPasswordService(), // BCrypt by default; use hash.Plaintext{} for testing and development
 		passwordSchema:       schema.New(schema.String{MinLength: 8, Required: true}),
 		revalidationInterval: defaultRevalidationInterval,
 	}

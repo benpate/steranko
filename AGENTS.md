@@ -1,6 +1,8 @@
 # Steranko — Notes for AI Agents
 
-- **`User.SetHashedPassword` takes an *already-hashed* value, never a plaintext.** The `User` interface stores whatever string it is handed. Always hash first by calling the `Steranko.SetPassword` helper (which runs the configured `PasswordHasher`); handing `user.SetHashedPassword` a raw password persists cleartext and breaks every later signin. (The methods were renamed from `Get`/`SetPassword` in the v0.28 breaking change precisely so that raw-plaintext call sites fail to compile.)
+- **`User.SetHashedPassword` takes an *already-hashed* value, never a plaintext.** The `User` interface stores whatever string it is handed. Always hash first via `PasswordService.SetPassword` (or the `Steranko.SetPassword` delegation); handing `user.SetHashedPassword` a raw password persists cleartext and breaks every later signin. (The methods were renamed from `Get`/`SetPassword` in the v0.28 breaking change precisely so that raw-plaintext call sites fail to compile.)
+
+- **`PasswordService` owns the hasher chain — never index it from outside.** "The first hasher is the primary" is encoded exactly once, in `PasswordService.primary()`. Applications that need to hash without a full Steranko instance construct one `PasswordService` and share it with Steranko via `WithPasswordService`; they must not reach into a hasher list with `[0]`.
 
 - **The hasher list is ordered: index 0 is primary, the rest are deprecated.** A password matched by any non-primary hasher is transparently re-hashed with the primary on the next signin (the `Rehash`/upgrade path). This is how bcrypt cost upgrades roll out — keep old hashers in the list until every user has signed in.
 

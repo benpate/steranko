@@ -11,17 +11,20 @@ import (
 
 // SetPassword hashes the provided plaintext password and sets it on the User.
 func (s *Steranko) SetPassword(user User, plaintext string) error {
+	return s.passwords.SetPassword(user, plaintext)
+}
 
-	const location = "steranko.SetPassword"
+// ComparePassword tries to validate the plaintext password and hashedValue using
+// each of the configured password hashers.  See PasswordService.ComparePassword
+// for the full contract.
+func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (bool, bool) {
+	return s.passwords.ComparePassword(plaintext, hashedValue)
+}
 
-	hashedValue, err := s.getPasswordHasher().HashPassword(plaintext)
-
-	if err != nil {
-		return derp.Wrap(err, location, "Error hashing password")
-	}
-
-	user.SetHashedPassword(hashedValue)
-	return nil
+// Passwords returns the PasswordService that owns this Steranko's hasher chain,
+// for callers that need to hash or compare passwords outside of a signin flow.
+func (s *Steranko) Passwords() PasswordService {
+	return s.passwords
 }
 
 /******************************************
@@ -71,33 +74,6 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 	return nil
 }
 
-// ComparePassword tries to validate the plaintext password and hashedValue using
-// each of the password hashers in sequence.  If the password matches THE PRIMARY hasher,
-// then this returns TRUE, FALSE.  If the password matches any of THE BACKUP hashers,
-// then this returns TRUE, TRUE.  If the password does not match any of the hashers
-// then this returns FALSE, FALSE.
-func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (bool, bool) {
-
-	// Try each hashing algorithm in order.
-	for index, passwordHasher := range s.passwordHashers {
-
-		// If the password matches, then return success.
-		if matches, update := passwordHasher.CompareHashedPassword(hashedValue, plaintext); matches {
-
-			// If we're using a deprecated hashing algorithm, then MUST update
-			if index > 0 {
-				update = true
-			}
-
-			// Yay!
-			return matches, update
-		}
-	}
-
-	// Boo!
-	return false, false
-}
-
 // decoyPasswordHash returns a throwaway hash, computed once with the primary
 // hasher and cached, that is used to keep the timing of a failed (user-not-found)
 // signin indistinguishable from a real password comparison. Using the primary
@@ -109,7 +85,7 @@ func (s *Steranko) decoyPasswordHash() string {
 		const decoyPlaintext = "steranko-decoy-password" // value is irrelevant; we only need a valid hash
 
 		// Prefer the configured primary hasher so the decoy comparison costs the same as a real one.
-		if hashed, err := s.getPasswordHasher().HashPassword(decoyPlaintext); err == nil {
+		if hashed, err := s.passwords.HashPassword(decoyPlaintext); err == nil {
 			s.decoyHash = hashed
 			return
 		}
@@ -125,18 +101,10 @@ func (s *Steranko) decoyPasswordHash() string {
 	return s.decoyHash
 }
 
-// getPasswordHasher returns the "primary" PasswordHasher, which is
-// the first one in the list. If no PasswordHashers have been configured,
-// it returns the default PasswordHasher.
-func (s *Steranko) getPasswordHasher() PasswordHasher {
-	if len(s.passwordHashers) > 0 {
-		return s.passwordHashers[0]
-	}
-
-	return defaultPasswordHasher()
-}
-
-// The defaultPasswordHasher is a simple BCrypt hasher with a cost of 15.
+// The defaultPasswordHasher is a simple BCrypt hasher.  Cost 12 keeps a single
+// hash near ~200ms: slow enough to resist offline cracking (OWASP recommends
+// >= 10), fast enough that signin latency and the CPU cost of a failed-signin
+// flood stay reasonable.
 func defaultPasswordHasher() PasswordHasher {
-	return hash.BCrypt(15)
+	return hash.BCrypt(12)
 }

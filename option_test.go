@@ -38,9 +38,9 @@ func TestWithPasswordHasher(t *testing.T) {
 	// WithPasswordHasher REPLACES the hasher list (it does not append).
 	s := New(getTestUserService(), getTestKeyService(), WithPasswordHasher(hash.Plaintext{}, hash.BCrypt(4)))
 
-	require.Len(t, s.passwordHashers, 2)
-	require.Equal(t, "Plaintext", s.passwordHashers[0].ID())
-	require.Equal(t, "BCrypt", s.passwordHashers[1].ID())
+	require.Len(t, s.passwords.hashers, 2)
+	require.Equal(t, "Plaintext", s.passwords.hashers[0].ID())
+	require.Equal(t, "BCrypt", s.passwords.hashers[1].ID())
 }
 
 func TestWithSigninService(t *testing.T) {
@@ -73,4 +73,14 @@ func TestWithConfigFile(t *testing.T) {
 		require.NotNil(t, s.passwordSchema.Element, "empty config must not erase the default schema")
 		require.Equal(t, 8, s.passwordSchema.Element.(schema.String).MinLength)
 	}
+}
+
+func TestWithPasswordService(t *testing.T) {
+
+	// WithPasswordService replaces the entire chain with the provided service.
+	passwords := NewPasswordService(hash.Plaintext{})
+	s := New(getTestUserService(), getTestKeyService(), WithPasswordService(passwords))
+
+	require.Equal(t, passwords, s.passwords)
+	require.Equal(t, passwords, s.Passwords())
 }

@@ -97,30 +97,12 @@ func TestComparePassword(t *testing.T) {
 	}
 }
 
-func TestGetPasswordHasher(t *testing.T) {
-
-	// The first configured hasher is the primary hasher.
-	{
-		s := New(getTestUserService(), getTestKeyService(), WithPasswordHasher(hash.Plaintext{}, hash.BCrypt(4)))
-		require.Equal(t, "Plaintext", s.getPasswordHasher().ID())
-	}
-
-	// When the hasher list is empty, the default (BCrypt) hasher is returned.
-	// This is a defensive fallback; New always installs a default, so it is
-	// only reachable by explicitly clearing the slice.
-	{
-		s := New(getTestUserService(), getTestKeyService())
-		s.passwordHashers = nil
-		require.Equal(t, "BCrypt", s.getPasswordHasher().ID())
-	}
-}
-
 func TestDefaultPasswordHasher(t *testing.T) {
 
 	// The default hasher must be BCrypt with the package's configured cost.
 	hasher := defaultPasswordHasher()
 	require.Equal(t, "BCrypt", hasher.ID())
-	require.Equal(t, hash.BCrypt(15), hasher)
+	require.Equal(t, hash.BCrypt(12), hasher)
 }
 
 // TestAuthenticate_UpgradesPassword confirms that authenticating against a
