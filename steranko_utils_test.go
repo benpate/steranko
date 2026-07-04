@@ -50,7 +50,7 @@ func TestSetPassword(t *testing.T) {
 		s := getTestSteranko() // configured with hash.Plaintext{}
 		user := s.userService.New()
 		require.Nil(t, s.SetPassword(user, "hunter2"))
-		require.Equal(t, "hunter2", user.GetPassword())
+		require.Equal(t, "hunter2", user.GetHashedPassword())
 	}
 
 	// With a BCrypt hasher the stored value must be hashed (never plaintext).
@@ -58,8 +58,8 @@ func TestSetPassword(t *testing.T) {
 		s := New(getTestUserService(), getTestKeyService(), WithPasswordHasher(hash.BCrypt(4)))
 		user := s.userService.New()
 		require.Nil(t, s.SetPassword(user, "hunter2"))
-		require.NotEqual(t, "hunter2", user.GetPassword())
-		require.NotEmpty(t, user.GetPassword())
+		require.NotEqual(t, "hunter2", user.GetHashedPassword())
+		require.NotEmpty(t, user.GetHashedPassword())
 	}
 }
 
@@ -137,7 +137,7 @@ func TestAuthenticate_UpgradesPassword(t *testing.T) {
 	// Seed a user whose stored password is a (deprecated) plaintext value.
 	seed := s.userService.New()
 	seed.SetUsername("upgrade@example.com")
-	seed.SetPassword("plaintext-password")
+	seed.SetHashedPassword("plaintext-password")
 	require.Nil(t, s.userService.Save(seed, "seed"))
 
 	// Authenticate with the correct password.
@@ -148,10 +148,10 @@ func TestAuthenticate_UpgradesPassword(t *testing.T) {
 	// BCrypt hash (no longer equal to the plaintext value).
 	reloaded := s.userService.New()
 	require.Nil(t, s.userService.Load("upgrade@example.com", reloaded))
-	require.NotEqual(t, "plaintext-password", reloaded.GetPassword())
+	require.NotEqual(t, "plaintext-password", reloaded.GetHashedPassword())
 
 	// And the upgraded hash must still authenticate the original password.
-	ok, update := s.ComparePassword("plaintext-password", reloaded.GetPassword())
+	ok, update := s.ComparePassword("plaintext-password", reloaded.GetHashedPassword())
 	require.True(t, ok)
 	require.False(t, update, "after upgrade the password should match the primary hasher")
 }

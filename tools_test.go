@@ -24,7 +24,7 @@ func TestAuthenticate(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, user)
 		require.Equal(t, "michael@jackson.com", user.GetUsername())
-		require.Equal(t, "hee-hee", user.GetPassword())
+		require.Equal(t, "hee-hee", user.GetHashedPassword())
 	}
 
 	{
@@ -33,7 +33,7 @@ func TestAuthenticate(t *testing.T) {
 		err := s.authenticate("michael@jackson.com", "hoo-hoo", user)
 		require.NotNil(t, err)
 		require.Equal(t, "michael@jackson.com", user.GetUsername())
-		require.Equal(t, "hee-hee", user.GetPassword())
+		require.Equal(t, "hee-hee", user.GetHashedPassword())
 	}
 
 	{
@@ -42,7 +42,7 @@ func TestAuthenticate(t *testing.T) {
 		err := s.authenticate("kendall@jackson.com", "chardonay", user)
 		require.NotNil(t, err)
 		require.Equal(t, "", user.GetUsername())
-		require.Equal(t, "", user.GetPassword())
+		require.Equal(t, "", user.GetHashedPassword())
 	}
 }
 

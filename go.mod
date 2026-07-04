@@ -19,7 +19,7 @@ require golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
 
 require (
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/benpate/uri v0.1.2 // indirect
+	github.com/benpate/uri v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/labstack/gommon v0.5.0 // indirect

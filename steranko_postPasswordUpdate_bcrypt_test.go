@@ -37,7 +37,7 @@ func getBCryptTestSteranko(t *testing.T) (*Steranko, UserService) {
 
 	user := userService.New()
 	user.SetUsername("ringo@beatles.com")
-	user.SetPassword(string(oldHash))
+	user.SetHashedPassword(string(oldHash))
 	require.NoError(t, userService.Save(user, "Created"))
 
 	s := New(
@@ -51,7 +51,7 @@ func getBCryptTestSteranko(t *testing.T) (*Steranko, UserService) {
 }
 
 // TestSetPassword_StoresHashed pins the contract that the Steranko.SetPassword
-// helper hashes the plaintext before handing it to User.SetPassword. This test
+// helper hashes the plaintext before handing it to User.SetHashedPassword. This test
 // is expected to PASS today; it establishes the baseline that hashing works
 // when the correct code path is used.
 func TestSetPassword_StoresHashed(t *testing.T) {
@@ -62,7 +62,7 @@ func TestSetPassword_StoresHashed(t *testing.T) {
 
 	require.NoError(t, s.SetPassword(user, "brand-new-password"))
 
-	stored := user.GetPassword()
+	stored := user.GetHashedPassword()
 	require.NotEqual(t, "brand-new-password", stored, "SetPassword must not store the plaintext password")
 	require.NoError(t, bcrypt.CompareHashAndPassword([]byte(stored), []byte("brand-new-password")),
 		"stored value must be a valid BCrypt hash of the plaintext")
@@ -71,7 +71,7 @@ func TestSetPassword_StoresHashed(t *testing.T) {
 // TestPostPasswordUpdate_StoresHashedPassword is the end-to-end proof of the
 // bug: with a real BCrypt hasher, PostPasswordUpdate must persist a HASHED new
 // password, not the raw plaintext. This test is expected to FAIL today because
-// the handler calls user.SetPassword(plaintext) directly, bypassing hashing.
+// the handler calls user.SetHashedPassword(plaintext) directly, bypassing hashing.
 func TestPostPasswordUpdate_StoresHashedPassword(t *testing.T) {
 
 	s, userService := getBCryptTestSteranko(t)
@@ -94,7 +94,7 @@ func TestPostPasswordUpdate_StoresHashedPassword(t *testing.T) {
 	reloaded := userService.New()
 	require.NoError(t, userService.Load("ringo@beatles.com", reloaded))
 
-	stored := reloaded.GetPassword()
+	stored := reloaded.GetHashedPassword()
 
 	// RULE: the persisted password must never be the raw plaintext.
 	require.NotEqual(t, "brand-new-password", stored,

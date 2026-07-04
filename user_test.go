@@ -23,7 +23,7 @@ func (tu testUser) GetUsername() string {
 	return tu.Username
 }
 
-func (tu testUser) GetPassword() string {
+func (tu testUser) GetHashedPassword() string {
 	return tu.Password
 }
 
@@ -31,7 +31,7 @@ func (tu *testUser) SetUsername(username string) {
 	tu.Username = username
 }
 
-func (tu *testUser) SetPassword(password string) {
+func (tu *testUser) SetHashedPassword(password string) {
 	tu.Password = password
 }
 

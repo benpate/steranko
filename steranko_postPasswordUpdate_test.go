@@ -31,7 +31,7 @@ func TestPostPasswordUpdate_Fail(t *testing.T) {
 	// RULE: a rejected update must leave the stored password untouched.
 	user := s.userService.New()
 	require.NoError(t, s.userService.Load("andrew@jackson.com", user))
-	require.Equal(t, "whitehouse", user.GetPassword(), "password must not change when the update is rejected")
+	require.Equal(t, "whitehouse", user.GetHashedPassword(), "password must not change when the update is rejected")
 }
 
 func TestPostPasswordUpdate_Success(t *testing.T) {
@@ -55,5 +55,5 @@ func TestPostPasswordUpdate_Success(t *testing.T) {
 	// Plaintext hasher, so the stored ciphertext equals the plaintext.)
 	user := s.userService.New()
 	require.NoError(t, s.userService.Load("andrew@jackson.com", user))
-	require.Equal(t, "valid-password", user.GetPassword(), "password must be updated on success")
+	require.Equal(t, "valid-password", user.GetHashedPassword(), "password must be updated on success")
 }

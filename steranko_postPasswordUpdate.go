@@ -30,9 +30,9 @@ func (s *Steranko) PostPasswordUpdate(ctx echo.Context) error {
 		return derp.Wrap(err, location, "Password does not meet requirements")
 	}
 
-	// Hash the new password before storing it. Calling user.SetPassword
-	// directly would persist the plaintext, because User.SetPassword expects an
-	// already-hashed value.
+	// Hash the new password before storing it. User.SetHashedPassword expects
+	// an already-hashed value, so the plaintext must never be passed to it
+	// directly.
 	if err := s.SetPassword(user, txn.NewPassword); err != nil {
 		return derp.Wrap(err, location, "Unable to hash new password", txn.Username)
 	}

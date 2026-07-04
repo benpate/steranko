@@ -20,7 +20,7 @@ func (s *Steranko) SetPassword(user User, plaintext string) error {
 		return derp.Wrap(err, location, "Error hashing password")
 	}
 
-	user.SetPassword(hashedValue)
+	user.SetHashedPassword(hashedValue)
 	return nil
 }
 
@@ -50,7 +50,7 @@ func (s *Steranko) authenticate(username string, password string, user User) err
 	}
 
 	// If we're here, then we have a matching user account. So, try to authenticate the password
-	ok, update := s.ComparePassword(password, user.GetPassword())
+	ok, update := s.ComparePassword(password, user.GetHashedPassword())
 
 	if !ok {
 		return derp.Unauthorized(location, "Unauthorized", username, "invalid password")

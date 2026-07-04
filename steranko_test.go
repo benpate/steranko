@@ -35,21 +35,21 @@ func getTestUserService() UserService {
 
 	mike := userService.New()
 	mike.SetUsername("michael@jackson.com")
-	mike.SetPassword("hee-hee")
+	mike.SetHashedPassword("hee-hee")
 	if err := userService.Save(mike, "Created"); err != nil {
 		panic(err)
 	}
 
 	janet := userService.New()
 	janet.SetUsername("janet@jackson.com")
-	janet.SetPassword("nasty")
+	janet.SetHashedPassword("nasty")
 	if err := userService.Save(janet, "Created"); err != nil {
 		panic(err)
 	}
 
 	andy := userService.New()
 	andy.SetUsername("andrew@jackson.com")
-	andy.SetPassword("whitehouse")
+	andy.SetHashedPassword("whitehouse")
 	if err := userService.Save(andy, "Created"); err != nil {
 		panic(err)
 	}
