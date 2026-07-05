@@ -36,9 +36,18 @@ func TestBCrypt(t *testing.T) {
 			require.False(t, update)
 		}
 
-		// Test out-of-date cipher
+		// Test out-of-date cipher (stored cost LOWER than configured => upgrade)
 		{
 			newCipher := BCrypt(11)
+			ok, update := newCipher.CompareHashedPassword(hashedValue, plaintext)
+			require.True(t, ok)
+			require.True(t, update)
+		}
+
+		// Test over-cost cipher (stored cost HIGHER than configured => downgrade,
+		// retiring the slower comparison)
+		{
+			newCipher := BCrypt(9)
 			ok, update := newCipher.CompareHashedPassword(hashedValue, plaintext)
 			require.True(t, ok)
 			require.True(t, update)

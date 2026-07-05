@@ -52,8 +52,13 @@ func (bc BCrypt) CompareHashedPassword(hashedValue string, plaintext string) (OK
 		derp.Report(derp.Wrap(err, "steranko.plugin.hash.CompareHashedPassword", "Unable to generate password cost", derp.WithInternalError()))
 	}
 
-	if cost < int(bc) {
-		// TRUE, TRUE means that the password is OK, but needs to be re-hashed
+	if cost != int(bc) {
+		// TRUE, TRUE means that the password is OK, but is stored at a different
+		// cost than currently configured, so it needs to be re-hashed.  This
+		// converges storage on the configured cost in BOTH directions: it
+		// upgrades weaker hashes after the cost is raised, and it retires
+		// more-expensive legacy hashes (with their slower comparisons) after
+		// the cost is lowered.
 		return true, true
 	}
 
