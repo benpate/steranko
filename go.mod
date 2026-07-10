@@ -7,7 +7,7 @@ require (
 	github.com/benpate/data-mock v0.32.1
 	github.com/benpate/derp v0.36.0
 	github.com/benpate/exp v0.10.0
-	github.com/benpate/remote v0.21.2
+	github.com/benpate/remote v0.22.0
 	github.com/benpate/rosetta v0.30.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/labstack/echo/v4 v4.15.4
