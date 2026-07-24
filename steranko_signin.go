@@ -26,14 +26,16 @@ func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 	// (short) random sleep to thwart timing attacks
 	sleepRandom(500, 1500)
 
-	// IF the user is locked out, then prevent the signin from continuing
+	// IF the user is locked out, then prevent the signin from continuing.
+	//
+	// A locked-out attempt is deliberately NOT reported to SigninFailure: doing so
+	// would let a temporary lockout renew itself for as long as an attacker keeps
+	// knocking, turning a time-boxed lock into an indefinite one. The lock must be
+	// allowed to age out. IsSigninLocked owns any side effect it wants on this path
+	// (for example penalizing the requesting IP), because only it fires here.
 	if locked := s.signinService.IsSigninLocked(ctx.Request(), txn.Username); locked {
-
-		// Log (another) failed signin
-		s.signinService.SigninFailure(ctx.Request(), txn.Username)
 		sleepRandom(1000, 2000) // (medium) random sleep to punish invalid signin attempts
-
-		return nil, derp.Forbidden(location, "Account locked. You must reset your password.")
+		return nil, derp.Forbidden(location, "Account locked. Please try again later.")
 	}
 
 	// Try to authenticate the user

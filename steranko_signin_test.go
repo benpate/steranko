@@ -126,8 +126,9 @@ func TestSigninFormPost_LockedOut(t *testing.T) {
 	require.Nil(t, user)
 	require.True(t, derp.IsForbidden(err))
 
-	// A lockout still records a failure, and never a success.
-	require.Equal(t, []string{"michael@jackson.com"}, spy.failures)
+	// A locked-out attempt records neither a failure nor a success: reporting it as
+	// a failure would let the lockout renew itself indefinitely (see SigninFormPost).
+	require.Empty(t, spy.failures)
 	require.Empty(t, spy.successes)
 }
 
