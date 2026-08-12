@@ -78,7 +78,32 @@ func (s *Steranko) SigninUser(ctx echo.Context, user User) error {
 		return derp.Wrap(err, location, "Unable to set signin cookie")
 	}
 
+	// RULE: A deliberate sign-in must never inherit a stacked (masquerade) identity left
+	// behind by a previous user of this browser. Clear any backup session so it cannot be
+	// restored by a later sign-out.
+	deleteCookie(ctx, cookieName(ctx.Request())+"-backup")
+
 	// Success.
+	return nil
+}
+
+// PushCookie writes a new session cookie while preserving the current session as a one-deep
+// backup (the "-backup" cookie), so a later SignOut can restore it.
+func (s *Steranko) PushCookie(ctx echo.Context, claims jwt.Claims) error {
+
+	const location = "steranko.PushCookie"
+
+	// This is the mechanism behind masquerade: a domain owner PushCookies to act as another
+	// user, and signing out pops back. Ordinary sign-in/revalidation use SetCookie (no stack).
+	// Preserve the current session in the backup slot BEFORE it is overwritten.
+	stashBackup(ctx)
+
+	// Set the new (masquerade) session as the active cookie.
+	if err := s.SetCookie(ctx, claims); err != nil {
+		return derp.Wrap(err, location, "Unable to set session cookie")
+	}
+
+	// Now you see me, now you don't.
 	return nil
 }
 
@@ -111,8 +136,10 @@ func (s *Steranko) SetCookie(ctx echo.Context, claims jwt.Claims) error {
 		// NOTE: Domain is excluded because it is less restrictive than omitting it. [https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies]
 	}
 
-	// Send the Cookie to the User's browser
-	pushCookie(ctx, cookie)
+	// Send the Cookie to the User's browser. This is an in-place write: it replaces the
+	// active session cookie and never touches the "-backup" slot. Stacking a backup (for
+	// masquerade) is done explicitly by PushCookie.
+	ctx.SetCookie(&cookie)
 
 	return nil
 }

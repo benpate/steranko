@@ -76,10 +76,26 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 
 	const location = "steranko.GetAuthorization"
 
-	// Retrieve the cookie value from the context
-	tokenString := s.findAuthorization(request)
+	// Retrieve the cookie/header value from the request and parse it into claims
+	claims, err := s.parseToken(s.findAuthorization(request))
 
-	// Parse the tokenString as a JWT token
+	if err != nil {
+		return nil, derp.Wrap(err, location, "Error parsing token")
+	}
+
+	// Success!
+	return claims, nil
+}
+
+// parseToken parses and validates a JWT token string, returning its claims. It pins the
+// permitted signing methods and rejects any token that is not validly signed and unexpired.
+func (s *Steranko) parseToken(tokenString string) (jwt.Claims, error) {
+
+	const location = "steranko.parseToken"
+
+	// Both the active session cookie and a restored "-backup" session parse through here,
+	// so the same rigor applies to each. The raw token is kept out of every error detail
+	// because it is a bearer credential that must not leak into logs.
 	claims := s.userService.NewClaims()
 	token, err := jwt.ParseWithClaims(tokenString, claims, s.keyService.FindKey, JWTValidMethods())
 
@@ -87,14 +103,10 @@ func (s *Steranko) GetAuthorization(request *http.Request) (jwt.Claims, error) {
 		return nil, derp.Wrap(err, location, "Error parsing token")
 	}
 
-	// Validate the token (date, signature, etc)
-	// NOTE: the raw token is deliberately excluded from the error details
-	// because it is a bearer credential that must not leak into logs.
 	if !token.Valid {
 		return nil, derp.Forbidden(location, "Token is invalid")
 	}
 
-	// Success!
 	return claims, nil
 }
 

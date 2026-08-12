@@ -143,42 +143,69 @@ func TestCopyCookie(t *testing.T) {
 	require.Equal(t, original.SameSite, clone.SameSite)
 }
 
-func TestPushCookie(t *testing.T) {
+func TestStashBackup(t *testing.T) {
 
-	// When an existing cookie is present, pushCookie should move it to a
-	// "-backup" cookie before writing the new value.
+	// When an existing session cookie is present, stashBackup copies it into the
+	// "-backup" slot with the 7-day pop-back budget.
 	{
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.AddCookie(&http.Cookie{Name: "Authorization", Value: "original-token"})
 		ctx, rec := echoContextWithRecorder(t, req)
 
-		pushCookie(ctx, http.Cookie{Name: "Authorization", Value: "new-token"})
+		stashBackup(ctx)
 
-		cookies := rec.Result().Cookies()
-
-		authCookie := findCookie(t, cookies, "Authorization")
-		require.NotNil(t, authCookie)
-		require.Equal(t, "new-token", authCookie.Value)
-
-		backupCookie := findCookie(t, cookies, "Authorization-backup")
+		backupCookie := findCookie(t, rec.Result().Cookies(), "Authorization-backup")
 		require.NotNil(t, backupCookie)
 		require.Equal(t, "original-token", backupCookie.Value)
+		require.Equal(t, backupCookieMaxAge, backupCookie.MaxAge, "backup must carry the 7-day budget")
 	}
 
-	// When there is no existing cookie, only the new cookie is written (no
-	// backup is created).
+	// When there is no existing cookie, nothing is stashed.
 	{
 		ctx, rec := echoContextWithRecorder(t, httptest.NewRequest(http.MethodGet, "/", nil))
 
-		pushCookie(ctx, http.Cookie{Name: "Authorization", Value: "new-token"})
+		stashBackup(ctx)
 
-		cookies := rec.Result().Cookies()
+		require.Nil(t, findCookie(t, rec.Result().Cookies(), "Authorization-backup"))
+	}
 
-		authCookie := findCookie(t, cookies, "Authorization")
-		require.NotNil(t, authCookie)
-		require.Equal(t, "new-token", authCookie.Value)
+	// An empty session cookie is not a session and must never be stacked as a backup.
+	{
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.AddCookie(&http.Cookie{Name: "Authorization", Value: ""})
+		ctx, rec := echoContextWithRecorder(t, req)
 
-		require.Nil(t, findCookie(t, cookies, "Authorization-backup"))
+		stashBackup(ctx)
+
+		require.Nil(t, findCookie(t, rec.Result().Cookies(), "Authorization-backup"))
+	}
+}
+
+func TestDeleteCookie(t *testing.T) {
+
+	// deleteCookie expires the named cookie immediately (empty value, negative Max-Age).
+	{
+		ctx, rec := echoContextWithRecorder(t, httptest.NewRequest(http.MethodGet, "http://example.com/", nil))
+
+		deleteCookie(ctx, "Authorization-backup")
+
+		cookie := findCookie(t, rec.Result().Cookies(), "Authorization-backup")
+		require.NotNil(t, cookie)
+		require.Empty(t, cookie.Value)
+		require.True(t, cookie.MaxAge < 0)
+		require.True(t, cookie.HttpOnly)
+		require.Equal(t, http.SameSiteStrictMode, cookie.SameSite)
+	}
+
+	// On a TLS request the deletion cookie is marked Secure.
+	{
+		ctx, rec := echoContextWithRecorder(t, httptest.NewRequest(http.MethodGet, "https://example.com/", nil))
+
+		deleteCookie(ctx, "__Host-Authorization-backup")
+
+		cookie := findCookie(t, rec.Result().Cookies(), "__Host-Authorization-backup")
+		require.NotNil(t, cookie)
+		require.True(t, cookie.Secure)
 	}
 }
 

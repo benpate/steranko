@@ -286,6 +286,79 @@ func TestRevalidate_RealToken_RoundTrip(t *testing.T) {
 	require.NotNil(t, findCookie(t, rec.Result().Cookies(), "Authorization"), "a real stale token must be re-minted")
 }
 
+// carrierClaims opts in to revalidation AND implements SessionCarrier, carrying a session-scoped
+// Flag (standing in for the masquerade marker) that must survive a re-mint.
+type carrierClaims struct {
+	jwt.RegisteredClaims
+	RevalidatedAt int64 `json:"srev,omitempty"`
+	Flag          bool  `json:"flag,omitempty"`
+}
+
+func (c carrierClaims) GetRevalidationTime() (time.Time, bool) {
+	if c.RevalidatedAt == 0 {
+		return time.Time{}, false
+	}
+	return time.Unix(c.RevalidatedAt, 0), true
+}
+
+func (c *carrierClaims) CarryForwardSessionState(previous jwt.Claims) {
+	if prev, ok := previous.(*carrierClaims); ok {
+		c.Flag = prev.Flag
+	}
+}
+
+// carrierUserService rebuilds claims as *carrierClaims whose Flag defaults to false, so a
+// surviving true Flag can only come from CarryForwardSessionState.
+type carrierUserService struct {
+	UserService
+}
+
+func (carrierUserService) NewClaims() jwt.Claims { return &carrierClaims{} }
+
+func (carrierUserService) Claims(user User) (jwt.Claims, error) {
+	return &carrierClaims{
+		RegisteredClaims: jwt.RegisteredClaims{Subject: user.GetUsername()},
+		RevalidatedAt:    time.Now().Unix(),
+		// Flag intentionally omitted: a fresh DB rebuild does not know the session state.
+	}, nil
+}
+
+func (carrierUserService) LoadBySubject(subject string, user User) error {
+	user.SetUsername(subject)
+	return nil
+}
+
+// TestRevalidate_CarriesForwardSessionState confirms that a session-scoped claim (the masquerade
+// marker, modeled as Flag) survives a revalidation re-mint that the user-record rebuild drops.
+func TestRevalidate_CarriesForwardSessionState(t *testing.T) {
+
+	s := getTestSteranko()
+	s.userService = carrierUserService{UserService: s.userService}
+
+	// A stale, opted-in session whose Flag (masquerade marker) is set.
+	previous := &carrierClaims{
+		RegisteredClaims: jwt.RegisteredClaims{Subject: "michael@jackson.com"},
+		RevalidatedAt:    time.Now().Add(-30 * time.Minute).Unix(),
+		Flag:             true,
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{Name: "Authorization", Value: "stale-token"})
+	ctx, rec := echoContextWithRecorder(t, req)
+
+	require.Nil(t, s.revalidate(ctx, previous))
+
+	// The re-minted cookie must still carry the Flag.
+	cookie := findCookie(t, rec.Result().Cookies(), "Authorization")
+	require.NotNil(t, cookie)
+
+	reminted, err := s.parseToken(cookie.Value)
+	require.Nil(t, err)
+	carried, ok := reminted.(*carrierClaims)
+	require.True(t, ok)
+	require.True(t, carried.Flag, "the session-scoped flag must be carried forward across revalidation")
+}
+
 // TestMiddleware_RevokedUser_Rejects confirms the wired-up middleware rejects a
 // request whose stale token belongs to a now-revoked user (fail closed).
 func TestMiddleware_RevokedUser_Rejects(t *testing.T) {

@@ -46,19 +46,51 @@ func sleepRandom(lower int, upper int) {
 	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 }
 
-// PushCookie sets a new cookie to the user's context, and moves their
-// existing cookie (if present) to be the "-backup" cookie.
-func pushCookie(ctx echo.Context, cookie http.Cookie) {
+// backupCookieMaxAge is how long a masquerade "-backup" cookie survives, in seconds (7 days).
+// Security does not rest on this lifetime; it only bounds how long a masquerade can pop back.
+const backupCookieMaxAge = 7 * 24 * 60 * 60
 
-	if originalCookie, err := ctx.Cookie(cookie.Name); err == nil {
+// stashBackup copies the request's current session cookie (if present and non-empty) into
+// the "-backup" slot, preserving it so a later SignOut can restore it.
+func stashBackup(ctx echo.Context) {
 
-		if backupCookie := copyCookie(originalCookie); backupCookie.Value != "" {
-			backupCookie.Name += "-backup"
-			ctx.SetCookie(&backupCookie)
-		}
+	// This one-deep session stack supports masquerade; it is written ONLY by PushCookie.
+	// Ordinary sign-in and revalidation use SetCookie, which never stacks.
+	originalCookie, err := ctx.Cookie(cookieName(ctx.Request()))
+
+	if err != nil {
+		return
 	}
 
-	ctx.SetCookie(&cookie)
+	// Copy the current session cookie, preserving its security attributes.
+	backupCookie := copyCookie(originalCookie)
+
+	// An empty cookie is not a session and must never be stacked as one.
+	if backupCookie.Value == "" {
+		return
+	}
+
+	backupCookie.Name += "-backup"
+	backupCookie.MaxAge = backupCookieMaxAge // 7-day pop-back budget (not the security boundary)
+	backupCookie.Expires = time.Time{}       // rely on Max-Age alone
+
+	ctx.SetCookie(&backupCookie)
+}
+
+// deleteCookie expires the named cookie immediately.
+func deleteCookie(ctx echo.Context, name string) {
+
+	// The attributes match those used when a session cookie is set (Path, Secure, HttpOnly,
+	// SameSite) so the browser reliably drops it, including a __Host- prefixed name on TLS.
+	ctx.SetCookie(&http.Cookie{
+		Name:     name,                    // The cookie to delete
+		Value:    "",                      // Erase the value of the cookie
+		MaxAge:   -1,                      // Negative Max-Age expires the cookie immediately (0 would omit the attribute)
+		Path:     "/",                     // Match the path used when the cookie was set
+		Secure:   ctx.IsTLS(),             // Set secure cookies if we're on a secure connection
+		HttpOnly: true,                    // Cookies should only be accessible via HTTPS (not client-side scripts)
+		SameSite: http.SameSiteStrictMode, // Strict same-site policy prevents cookies from being used by other sites.
+	})
 }
 
 // cookieName returns the cookie name to use for a given request.
