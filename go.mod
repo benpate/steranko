@@ -11,7 +11,7 @@ require (
 	github.com/benpate/rosetta v0.33.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/labstack/echo/v4 v4.15.4
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	golang.org/x/crypto v0.54.0
 )
 
@@ -19,13 +19,11 @@ require github.com/aymerick/douceur v0.2.0 // indirect
 
 require (
 	github.com/benpate/uri v0.5.0 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/labstack/gommon v0.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	golang.org/x/exp v0.0.0-20260718201538-764159d718ef // indirect; indirect	github.com/aymerick/douceur v0.2.0 // indirect
