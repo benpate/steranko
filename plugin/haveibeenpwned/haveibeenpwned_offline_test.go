@@ -165,3 +165,36 @@ func FuzzHashAndSplit(f *testing.F) {
 		require.Len(t, suffix, 35)
 	})
 }
+
+// TestMatchSuffix_LongLine confirms that an over-long line does not silently end
+// the scan. bufio.Scanner stops at 64KB by default and reports the truncation only
+// through Err(), which the loop never sees -- so every suffix after the long line
+// would go uncompared and a breached password would be waved through as safe.
+func TestMatchSuffix_LongLine(t *testing.T) {
+
+	suffix := strings.Repeat("A", 35)
+
+	// A line well past the 64KB default, followed by the entry that MUST be found.
+	var response bytes.Buffer
+	response.WriteString(strings.Repeat("X", 70000) + ":1\n")
+	response.WriteString(suffix + ":42\n")
+
+	ok, message := matchSuffix(&response, suffix)
+
+	require.False(t, ok, "a breached password after a long line must still be found")
+	require.Contains(t, message, "42")
+}
+
+// TestMatchSuffix_OversizedLine confirms the fail-open contract at the boundary:
+// a line past even the 1MB cap cannot be scanned, and an unscannable response
+// must allow the password rather than block every signin.
+func TestMatchSuffix_OversizedLine(t *testing.T) {
+
+	var response bytes.Buffer
+	response.WriteString(strings.Repeat("X", (1<<20)+1))
+
+	ok, message := matchSuffix(&response, strings.Repeat("A", 35))
+
+	require.True(t, ok, "an unreadable response fails OPEN, like an unreachable API")
+	require.Empty(t, message)
+}

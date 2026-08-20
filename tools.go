@@ -56,25 +56,35 @@ func stashBackup(ctx echo.Context) {
 
 	// This one-deep session stack supports masquerade; it is written ONLY by PushCookie.
 	// Ordinary sign-in and revalidation use SetCookie, which never stacks.
-	originalCookie, err := ctx.Cookie(cookieName(ctx.Request()))
+	request := ctx.Request()
+	originalCookie, err := ctx.Cookie(cookieName(request))
 
 	if err != nil {
 		return
 	}
 
-	// Copy the current session cookie, preserving its security attributes.
-	backupCookie := copyCookie(originalCookie)
-
 	// An empty cookie is not a session and must never be stacked as one.
-	if backupCookie.Value == "" {
+	if originalCookie.Value == "" {
 		return
 	}
 
-	backupCookie.Name += "-backup"
-	backupCookie.MaxAge = backupCookieMaxAge // 7-day pop-back budget (not the security boundary)
-	backupCookie.Expires = time.Time{}       // rely on Max-Age alone
-
-	ctx.SetCookie(&backupCookie)
+	// RULE: The backup slot holds a live session token, so it MUST carry the same protections
+	// as the active session cookie. The attributes are rebuilt here rather than copied from
+	// originalCookie, because a cookie read from a REQUEST carries only a Name and a Value --
+	// browsers never send Secure/HttpOnly/SameSite/Path back. Copying one yields an unprotected
+	// cookie that scripts can read, and whose missing Secure and Path violate the __Host- prefix
+	// rules, so the browser drops it and the pop-back silently fails over TLS.
+	// #nosec G124 -- Secure tracks the connection because Steranko also serves plain HTTP in
+	// development; on TLS isTLS() is true and the __Host- prefix requirement is met.
+	ctx.SetCookie(&http.Cookie{
+		Name:     originalCookie.Name + "-backup",
+		Value:    originalCookie.Value,
+		MaxAge:   backupCookieMaxAge,   // 7-day pop-back budget (not the security boundary)
+		Path:     "/",                  // Match SetCookie, and satisfy the __Host- prefix
+		Secure:   isTLS(request),       // Match SetCookie, and satisfy the __Host- prefix
+		HttpOnly: true,                 // Keep the stacked session token away from client-side scripts
+		SameSite: http.SameSiteLaxMode, // Match the active session cookie
+	})
 }
 
 // deleteCookie expires the named cookie immediately.
@@ -82,6 +92,8 @@ func deleteCookie(ctx echo.Context, name string) {
 
 	// The attributes match those used when a session cookie is set (Path, Secure, HttpOnly,
 	// SameSite) so the browser reliably drops it, including a __Host- prefixed name on TLS.
+	// #nosec G124 -- Secure tracks the connection, for the same reason as the session cookie
+	// this deletion has to match; a literal `true` would not delete a plain-HTTP cookie.
 	ctx.SetCookie(&http.Cookie{
 		Name:     name,                    // The cookie to delete
 		Value:    "",                      // Erase the value of the cookie
@@ -110,18 +122,4 @@ func cookieName(request *http.Request) string {
 // isTLS returns TRUE if the given http.Request uses an SSL connection
 func isTLS(request *http.Request) bool {
 	return request.TLS != nil
-}
-
-func copyCookie(original *http.Cookie) http.Cookie {
-	return http.Cookie{
-		Name:     original.Name,
-		Value:    original.Value,
-		MaxAge:   original.MaxAge,
-		Expires:  original.Expires,
-		Domain:   original.Domain,
-		Path:     original.Path,
-		HttpOnly: original.HttpOnly,
-		Secure:   original.Secure,
-		SameSite: original.SameSite,
-	}
 }

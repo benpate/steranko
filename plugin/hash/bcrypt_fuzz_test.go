@@ -76,7 +76,7 @@ func FuzzBCryptCompareHashedPassword(f *testing.F) {
 
 	bc := BCrypt(4)
 
-	f.Fuzz(func(t *testing.T, hashedValue string, plaintext string) {
+	f.Fuzz(func(_ *testing.T, hashedValue string, plaintext string) {
 		// The only invariant we can cheaply assert is that this never panics.
 		// (A random string being a valid bcrypt hash of the plaintext is
 		// astronomically unlikely.)

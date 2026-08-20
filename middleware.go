@@ -23,14 +23,11 @@ func Middleware(factory Factory) echo.MiddlewareFunc {
 				return err
 			}
 
-			// Verify that the request is valid
-			if err := s.ApproveRequest(ctx); err != nil {
-				return err
-			}
-
-			// call the next function in the chain, now
-			// using a Steranko context instead of the original
-			return next(s.Context(ctx))
+			// Hand off to the instance middleware so that BOTH entry points apply an identical
+			// chain: request approval, then fail-closed revalidation of an aged session. This
+			// used to be re-implemented here, which silently omitted revalidation and let a
+			// deleted or demoted user keep their session in a multi-tenant deployment.
+			return s.Middleware(next)(ctx)
 		}
 	}
 }

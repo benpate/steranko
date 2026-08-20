@@ -119,9 +119,18 @@ func (s *Steranko) findAuthorization(request *http.Request) string {
 	}
 
 	// Otherwise, look at the Authorization header
-	if bearerToken := request.Header.Get("Authorization"); bearerToken != "" {
-		bearerToken = strings.TrimPrefix(bearerToken, "Bearer ")
-		return bearerToken
+	if header := request.Header.Get("Authorization"); header != "" {
+
+		// RFC 9110 §11.1 makes the auth scheme case-insensitive, and real clients send
+		// "bearer" and extra padding as readily as the canonical "Bearer ". Tolerating the
+		// prefix grants nothing on its own -- the token it uncovers still has to survive
+		// full signature and expiry checks in parseToken.
+		if scheme, token, found := strings.Cut(header, " "); found && strings.EqualFold(scheme, "Bearer") {
+			return strings.TrimSpace(token)
+		}
+
+		// A header with no recognized scheme is treated as a bare token.
+		return header
 	}
 
 	return ""

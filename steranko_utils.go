@@ -31,10 +31,10 @@ func (s *Steranko) Passwords() PasswordService {
  * Helper Methods
  ******************************************/
 
-// Authenticate verifies a username/password combination.
+// authenticate verifies a username/password combination.
 func (s *Steranko) authenticate(username string, password string, user User) error {
 
-	const location = "steranko.Authenticate"
+	const location = "steranko.authenticate"
 
 	// Try to load the User from the UserService
 	if err := s.userService.Load(username, user); err != nil {

@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/benpate/derp"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
@@ -69,4 +72,34 @@ func TestSterankoMiddleware(t *testing.T) {
 	ctx := echoContext(t, httptest.NewRequest(http.MethodGet, "/", nil))
 	require.Nil(t, handler(ctx))
 	require.True(t, called)
+}
+
+// TestMiddleware_Factory_RevalidatesRevokedSession confirms that the multi-tenant
+// Middleware applies the SAME fail-closed revalidation as the instance-bound one.
+// A user deleted since their token was minted must be rejected through EITHER entry
+// point; a version that re-implements the chain instead of delegating drops the
+// revalidation step and admits them.
+func TestMiddleware_Factory_RevalidatesRevokedSession(t *testing.T) {
+
+	s := getTestSteranko()
+	s.userService = notFoundUserService{revalUserService{s.userService}} // the user has been deleted
+
+	// A session that opted in to revalidation, and is well past the 10-minute window.
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "Authorization",
+		Value: staleRevalToken(t, s, "michael@jackson.com", 30*time.Minute),
+	})
+
+	called := false
+	handler := Middleware(staticFactory{steranko: s})(func(ctx echo.Context) error {
+		called = true
+		return nil
+	})
+
+	err := handler(echoContext(t, req))
+
+	require.NotNil(t, err, "a revoked session must be rejected")
+	require.True(t, derp.IsForbidden(err))
+	require.False(t, called, "a revoked user must never reach the handler")
 }

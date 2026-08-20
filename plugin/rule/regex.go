@@ -4,6 +4,9 @@ import (
 	"regexp"
 )
 
+// The character classes counted by this package. They are deliberately ASCII-only: the
+// keyspace estimate in Combinations is stated in terms of these pool sizes, so widening a
+// class here without widening that estimate would silently overstate password strength.
 var digitsRegex = regexp.MustCompile("[0123456789]")
 var uppercaseRegex = regexp.MustCompile("[ABCDEFGHIJKLMNOPQRSTUVWXYZ]")
 var lowercaseRegex = regexp.MustCompile("[abcdefghijklmnopqrstuvwxyz]")

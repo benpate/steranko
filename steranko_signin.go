@@ -14,7 +14,7 @@ import (
 // If unsuccessful, an error is returned to the caller.
 func (s *Steranko) SigninFormPost(ctx echo.Context) (User, error) {
 
-	const location = "steranko.Signin"
+	const location = "steranko.SigninFormPost"
 
 	var txn SigninTransaction
 
@@ -125,6 +125,8 @@ func (s *Steranko) SetCookie(ctx echo.Context, claims jwt.Claims) error {
 	secure := isTLS(request)
 
 	// Return the JWT certificate as a cookie
+	// #nosec G124 -- Secure tracks the connection because Steranko also serves plain HTTP in
+	// development. On TLS this is true, which is what the __Host- cookie name requires.
 	cookie := http.Cookie{
 		Name:     name,
 		Value:    token,                // Set the cookie's value

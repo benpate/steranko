@@ -209,6 +209,25 @@ func TestFindAuthorization(t *testing.T) {
 	req := cookieRequest("from-cookie")
 	req.Header.Set("Authorization", "Bearer from-header")
 	require.Equal(t, "from-cookie", s.findAuthorization(req))
+
+	// RFC 9110 §11.1 makes the auth scheme case-insensitive, and clients in the wild send
+	// every casing. Matching only the canonical "Bearer " leaves the scheme glued to the
+	// token, so the whole header is handed to the parser and a valid session is rejected.
+	require.Equal(t, "header-token", s.findAuthorization(headerRequest("bearer header-token")))
+	require.Equal(t, "header-token", s.findAuthorization(headerRequest("BEARER header-token")))
+	require.Equal(t, "header-token", s.findAuthorization(headerRequest("BeArEr header-token")))
+
+	// Padding between the scheme and the token is tolerated for the same reason.
+	require.Equal(t, "header-token", s.findAuthorization(headerRequest("Bearer   header-token")))
+
+	// A second "Bearer" is part of the token, not a second prefix to strip.
+	require.Equal(t, "Bearer x", s.findAuthorization(headerRequest("Bearer Bearer x")))
+
+	// An empty Bearer credential stays empty rather than becoming the scheme itself.
+	require.Equal(t, "", s.findAuthorization(headerRequest("Bearer ")))
+
+	// A DIFFERENT scheme is not unwrapped: the header is returned whole and fails downstream.
+	require.Equal(t, "Basic dXNlcjpwYXNz", s.findAuthorization(headerRequest("Basic dXNlcjpwYXNz")))
 }
 
 // TestGetAuthorization_ErrorCodes documents that a structurally-invalid token

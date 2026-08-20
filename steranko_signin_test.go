@@ -294,3 +294,75 @@ func findCookie(t *testing.T, cookies []*http.Cookie, name string) *http.Cookie 
 	}
 	return nil
 }
+
+// TestPushCookie_StacksPreviousSession confirms the masquerade entry point: the
+// caller's existing session is preserved in the "-backup" slot and the new claims
+// become the active session. BOTH cookies must carry the full protections of a
+// session cookie, because both of them ARE live session tokens.
+func TestPushCookie_StacksPreviousSession(t *testing.T) {
+
+	s := getTestSteranko()
+	s.userService = revalUserService{s.userService}
+
+	// The domain owner is signed in and about to masquerade as someone else.
+	ownerToken, err := s.CreateJWT(revalClaims("owner", 0))
+	require.Nil(t, err)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{Name: "Authorization", Value: ownerToken})
+	ctx, rec := echoContextWithRecorder(t, req)
+
+	require.Nil(t, s.PushCookie(ctx, revalClaims("target", 0)))
+
+	cookies := rec.Result().Cookies()
+
+	// The owner's session moved to the backup slot, intact and protected.
+	backup := findCookie(t, cookies, "Authorization-backup")
+	require.NotNil(t, backup)
+	require.Equal(t, ownerToken, backup.Value)
+	require.Equal(t, backupCookieMaxAge, backup.MaxAge)
+	require.True(t, backup.HttpOnly)
+
+	// The active session is now the masquerade target, and is NOT the owner's token.
+	active := findCookie(t, cookies, "Authorization")
+	require.NotNil(t, active)
+	require.NotEqual(t, ownerToken, active.Value)
+	require.True(t, active.HttpOnly)
+
+	// The stacked session must be poppable: SignOut restores it.
+	popReq := httptest.NewRequest(http.MethodGet, "/", nil)
+	popReq.AddCookie(&http.Cookie{Name: "Authorization", Value: active.Value})
+	popReq.AddCookie(&http.Cookie{Name: "Authorization-backup", Value: backup.Value})
+
+	popCtx, popRec := echoContextWithRecorder(t, popReq)
+	require.True(t, s.SignOut(popCtx), "a valid backup must pop back")
+	require.NotNil(t, findCookie(t, popRec.Result().Cookies(), "Authorization"))
+}
+
+// TestPushCookie_NoExistingSession confirms that pushing when nothing is stacked
+// writes only the new session, and never an empty backup that SignOut would try
+// to restore.
+func TestPushCookie_NoExistingSession(t *testing.T) {
+
+	s := getTestSteranko()
+	s.userService = revalUserService{s.userService}
+
+	ctx, rec := echoContextWithRecorder(t, httptest.NewRequest(http.MethodGet, "/", nil))
+	require.Nil(t, s.PushCookie(ctx, revalClaims("target", 0)))
+
+	require.NotNil(t, findCookie(t, rec.Result().Cookies(), "Authorization"))
+	require.Nil(t, findCookie(t, rec.Result().Cookies(), "Authorization-backup"))
+}
+
+// TestPushCookie_KeyServiceError confirms a signing failure is reported rather
+// than leaving the caller believing a masquerade session was installed.
+func TestPushCookie_KeyServiceError(t *testing.T) {
+
+	s := getTestSteranko()
+	s.keyService = errorKeyService{}
+
+	ctx, rec := echoContextWithRecorder(t, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	require.NotNil(t, s.PushCookie(ctx, jwt.RegisteredClaims{Subject: "target"}))
+	require.Nil(t, findCookie(t, rec.Result().Cookies(), "Authorization"))
+}

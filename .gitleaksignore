@@ -1,0 +1,24 @@
+# Gitleaks allowlist for github.com/benpate/steranko
+#
+# Every entry below is a JSON Web Token fixture in a TEST file. They are not
+# credentials: the test KeyService signs and verifies with the literal string
+# "secret" (keyService_test.go), and the tokens themselves are the published
+# example JWTs from jwt.io. They exist so the parser, the middleware, and the
+# key-rotation path can be exercised against realistic input.
+#
+# Fingerprints are pinned individually so that a genuinely new secret in these
+# same files is still reported.
+
+# Working tree: the jwt.io example token used by TestContextAuthorization.
+context_test.go:jwt:21
+
+# Git history (commit 3bc1150f, 2021-05-31). These lines no longer exist in the
+# working tree, but `gitleaks detect` scans history and still finds them.
+3bc1150f6341b68810d1406fd2d4c403c7f59401:context_test.go:jwt:21
+3bc1150f6341b68810d1406fd2d4c403c7f59401:middleware_test.go:jwt:33
+3bc1150f6341b68810d1406fd2d4c403c7f59401:middleware_test.go:jwt:34
+3bc1150f6341b68810d1406fd2d4c403c7f59401:middleware_test.go:jwt:72
+3bc1150f6341b68810d1406fd2d4c403c7f59401:middleware_test.go:jwt:291
+3bc1150f6341b68810d1406fd2d4c403c7f59401:middleware_test.go:jwt:292
+3bc1150f6341b68810d1406fd2d4c403c7f59401:middleware_test.go:jwt:293
+3bc1150f6341b68810d1406fd2d4c403c7f59401:middleware_test.go:jwt:294

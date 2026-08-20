@@ -5,16 +5,22 @@ package haveibeenpwned
 import (
 	"bufio"
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha1" // #nosec G505 -- SHA-1 is fixed by the Pwned Passwords range API, not a choice
 	"encoding/hex"
 	"strings"
 
+	"github.com/benpate/derp"
 	"github.com/benpate/remote"
 )
 
 // defaultBaseURL is the production HaveIBeenPwned range endpoint. The 5-character
 // SHA-1 prefix is appended to this value.
 const defaultBaseURL = "https://api.pwnedpasswords.com/range/"
+
+// maxResponseSize bounds the breach response. A range query returns only a few KB, so this is
+// far above any legitimate answer while still protecting against a hostile or malfunctioning
+// server. It caps BOTH the download and the line scanner, so the two cannot disagree.
+const maxResponseSize = 1 << 20 // 1MB
 
 // API represents the HaveIBeenPwned.com api, and manages all remote calls to this API to check for passwords that have appeared in previous data breaches.
 type API struct {
@@ -46,7 +52,7 @@ func (api *API) ValidatePassword(password string) (OK bool, message string) {
 	var response bytes.Buffer
 
 	transaction := remote.Get(api.baseURL() + prefix).
-		MaxResponseSize(1 << 20). // 1MB
+		MaxResponseSize(maxResponseSize).
 		Result(&response)
 
 	// Fail open: if the remote service is unreachable (or the response exceeds
@@ -71,6 +77,9 @@ func (api *API) baseURL() string {
 // hashAndSplit returns the uppercase hex SHA-1 of the password, split into the
 // 5-character range prefix and the remaining suffix used for local matching.
 func hashAndSplit(password string) (prefix string, suffix string) {
+	// #nosec G401 -- The k-anonymity range API is defined in terms of SHA-1: the server indexes
+	// by the first 5 hex characters of the SHA-1 digest, so no other algorithm can query it.
+	// Nothing here is stored or trusted as a credential; the digest is a lookup key.
 	hashedBytes := sha1.Sum([]byte(password))
 	encoded := strings.ToUpper(hex.EncodeToString(hashedBytes[:]))
 
@@ -81,13 +90,27 @@ func hashAndSplit(password string) (prefix string, suffix string) {
 // for the given hash suffix, returning whether the password is safe to use.
 func matchSuffix(response *bytes.Buffer, suffix string) (OK bool, message string) {
 
-	for scanner := bufio.NewScanner(response); scanner.Scan(); {
+	scanner := bufio.NewScanner(response)
+
+	// Size the scanner to the same 1MB cap that bounds the response. At the default 64KB line
+	// limit, a single over-long line ends the scan early with no error visible here, so every
+	// suffix after it goes uncompared and a breached password is reported as safe.
+	scanner.Buffer(make([]byte, 0, bufio.MaxScanTokenSize), maxResponseSize)
+
+	for scanner.Scan() {
 		line := scanner.Text()
 		usedSuffix, useCount, _ := strings.Cut(line, ":") // nolint:scopeguard - readability
 
 		if usedSuffix == suffix {
 			return false, "Password has been used " + useCount + " times before on hacked websites.  Visit https://haveibeenpwned.com for more info."
 		}
+	}
+
+	// A scan that ended early has not cleared this password, but it has not condemned it either.
+	// Report the same fail-open answer as an unreachable API: a partial answer must not become a
+	// rejection, and the incomplete read is surfaced to the caller's logs rather than swallowed.
+	if err := scanner.Err(); err != nil {
+		derp.Report(derp.Wrap(err, "steranko.plugin.haveibeenpwned.matchSuffix", "Unable to read the full breach response; password was NOT checked"))
 	}
 
 	return true, ""

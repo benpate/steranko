@@ -1,6 +1,7 @@
 package steranko
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -117,32 +118,6 @@ func TestIsTLS(t *testing.T) {
 	require.True(t, isTLS(httptest.NewRequest(http.MethodGet, "https://example.com/", nil)))
 }
 
-func TestCopyCookie(t *testing.T) {
-
-	// copyCookie must produce a value-equal copy of every relevant field.
-	original := &http.Cookie{
-		Name:     "Authorization",
-		Value:    "token-value",
-		MaxAge:   1234,
-		Domain:   "example.com",
-		Path:     "/path",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
-	}
-
-	clone := copyCookie(original)
-
-	require.Equal(t, original.Name, clone.Name)
-	require.Equal(t, original.Value, clone.Value)
-	require.Equal(t, original.MaxAge, clone.MaxAge)
-	require.Equal(t, original.Domain, clone.Domain)
-	require.Equal(t, original.Path, clone.Path)
-	require.Equal(t, original.HttpOnly, clone.HttpOnly)
-	require.Equal(t, original.Secure, clone.Secure)
-	require.Equal(t, original.SameSite, clone.SameSite)
-}
-
 func TestStashBackup(t *testing.T) {
 
 	// When an existing session cookie is present, stashBackup copies it into the
@@ -158,6 +133,43 @@ func TestStashBackup(t *testing.T) {
 		require.NotNil(t, backupCookie)
 		require.Equal(t, "original-token", backupCookie.Value)
 		require.Equal(t, backupCookieMaxAge, backupCookie.MaxAge, "backup must carry the 7-day budget")
+	}
+
+	// RULE: The backup slot holds a live session token, so it must be protected exactly like
+	// the active session cookie. Attributes cannot be read back off a request cookie, so a
+	// version that copies one produces a script-readable, non-Secure session token.
+	{
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.AddCookie(&http.Cookie{Name: "Authorization", Value: "original-token"})
+		ctx, rec := echoContextWithRecorder(t, req)
+
+		stashBackup(ctx)
+
+		backupCookie := findCookie(t, rec.Result().Cookies(), "Authorization-backup")
+		require.NotNil(t, backupCookie)
+		require.True(t, backupCookie.HttpOnly, "a stacked session token must not be readable by scripts")
+		require.Equal(t, "/", backupCookie.Path, "the backup must be readable by the signout route")
+		require.Equal(t, http.SameSiteLaxMode, backupCookie.SameSite)
+		require.False(t, backupCookie.Secure, "a plain HTTP request cannot set a Secure cookie")
+	}
+
+	// Over TLS the backup is named with the __Host- prefix, which browsers accept ONLY when the
+	// cookie is Secure, has Path=/, and carries no Domain. Failing any of those makes the browser
+	// discard the cookie outright, and the masquerade pop-back silently stops working.
+	{
+		req := httptest.NewRequest(http.MethodGet, "https://example.com/deep/path", nil)
+		req.TLS = &tls.ConnectionState{}
+		req.AddCookie(&http.Cookie{Name: "__Host-Authorization", Value: "original-token"})
+		ctx, rec := echoContextWithRecorder(t, req)
+
+		stashBackup(ctx)
+
+		backupCookie := findCookie(t, rec.Result().Cookies(), "__Host-Authorization-backup")
+		require.NotNil(t, backupCookie)
+		require.True(t, backupCookie.Secure, "__Host- cookies must be Secure")
+		require.Equal(t, "/", backupCookie.Path, "__Host- cookies must use Path=/")
+		require.Empty(t, backupCookie.Domain, "__Host- cookies must not set a Domain")
+		require.True(t, backupCookie.HttpOnly)
 	}
 
 	// When there is no existing cookie, nothing is stashed.
