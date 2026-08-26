@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/benpate/data v0.33.0
 	github.com/benpate/data-mock v0.33.0
-	github.com/benpate/derp v0.39.0
+	github.com/benpate/derp v0.40.0
 	github.com/benpate/exp v0.11.0
 	github.com/benpate/remote v0.24.0
 	github.com/benpate/rosetta v0.35.0
