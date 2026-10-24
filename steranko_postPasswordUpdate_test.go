@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/benpate/derp"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
@@ -56,4 +57,36 @@ func TestPostPasswordUpdate_Success(t *testing.T) {
 	user := s.userService.New()
 	require.NoError(t, s.userService.Load("andrew@jackson.com", user))
 	require.Equal(t, "valid-password", user.GetHashedPassword(), "password must be updated on success")
+}
+
+// TestPostPasswordUpdate_EmptyOldPassword confirms that an account with no stored password
+// cannot be given one by presenting an empty old password.
+func TestPostPasswordUpdate_EmptyOldPassword(t *testing.T) {
+
+	s := getTestSteranko()
+
+	// Seed an account that was saved with no password at all
+	blank := s.userService.New()
+	blank.SetUsername("blank@example.com")
+	require.NoError(t, s.userService.Save(blank, "seed"))
+
+	transaction := make(url.Values)
+	transaction.Set("username", "blank@example.com")
+	transaction.Set("oldPassword", "")
+	transaction.Set("newPassword", "valid-password")
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(transaction.Encode()))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	c := e.NewContext(req, httptest.NewRecorder())
+
+	err := s.PostPasswordUpdate(c)
+
+	require.Error(t, err)
+	require.True(t, derp.IsBadRequest(err), "got code %d", derp.ErrorCode(err))
+
+	// RULE: The account still has no password, rather than one the requester chose
+	user := s.userService.New()
+	require.NoError(t, s.userService.Load("blank@example.com", user))
+	require.Empty(t, user.GetHashedPassword(), "password must not change when the old password is empty")
 }

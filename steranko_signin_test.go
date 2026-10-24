@@ -107,6 +107,41 @@ func TestSigninFormPost_UnknownUser(t *testing.T) {
 	require.Equal(t, []string{"nobody@nowhere.com"}, spy.failures)
 }
 
+// TestSigninFormPost_MissingPassword confirms that a signin with no password gets the same
+// answer as a wrong one, even for an account that has no stored password.
+func TestSigninFormPost_MissingPassword(t *testing.T) {
+
+	spy := &spySigninService{}
+	s := getTestSteranko()
+	s.WithOptions(WithSigninService(spy))
+
+	// Seed an account that was saved with no password at all
+	blank := s.userService.New()
+	blank.SetUsername("blank@example.com")
+	require.NoError(t, s.userService.Save(blank, "seed"))
+
+	// Post the username alone, so the password binds as ""
+	form := url.Values{}
+	form.Set("username", "blank@example.com")
+
+	ctx, rec := echoContextWithRecorder(t, formRequest(form))
+
+	user, err := s.SigninFormPost(ctx)
+
+	require.Error(t, err)
+	require.Nil(t, user)
+	require.True(t, derp.IsForbidden(err), "got code %d", derp.ErrorCode(err))
+	require.Equal(t, "Invalid username/password.", derp.Message(err))
+
+	// The failure is recorded like any other, and no session cookie is written
+	require.Equal(t, []string{"blank@example.com"}, spy.failures)
+	require.Empty(t, spy.successes)
+
+	for _, cookie := range rec.Result().Cookies() {
+		require.NotEqual(t, "Authorization", cookie.Name)
+	}
+}
+
 func TestSigninFormPost_LockedOut(t *testing.T) {
 
 	spy := &spySigninService{locked: true}

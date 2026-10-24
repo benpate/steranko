@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/benpate/derp"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -86,6 +87,79 @@ type claimsErrorUserService struct {
 
 func (s claimsErrorUserService) Claims(user User) (jwt.Claims, error) {
 	return nil, errors.New("cannot build claims")
+}
+
+// memoryUserService is a UserService that keeps each account's hashed password in a map
+// keyed by username. Methods it does not override panic on the nil embedded value.
+type memoryUserService struct {
+	UserService
+	hashes map[string]string
+}
+
+// New returns an empty testUser.
+func (s memoryUserService) New() User {
+	return &testUser{}
+}
+
+// Load copies the named account into the User, or returns a NotFound error.
+func (s memoryUserService) Load(username string, user User) error {
+
+	hashedValue, exists := s.hashes[username]
+
+	if !exists {
+		return derp.NotFound("memoryUserService.Load", "User not found")
+	}
+
+	user.SetUsername(username)
+	user.SetHashedPassword(hashedValue)
+	return nil
+}
+
+// Save stores the User's hashed password under its username.
+func (s memoryUserService) Save(user User, comment string) error {
+	s.hashes[user.GetUsername()] = user.GetHashedPassword()
+	return nil
+}
+
+// spyUserService wraps a UserService, counting the calls made to Load and Save, and can
+// force either one to fail.
+type spyUserService struct {
+	UserService
+	loadErr error
+	saveErr error
+	loads   int
+	saves   int
+}
+
+// Load counts the call, then returns loadErr when it is set or delegates otherwise.
+func (s *spyUserService) Load(username string, user User) error {
+
+	s.loads++
+
+	if s.loadErr != nil {
+		return s.loadErr
+	}
+
+	return s.UserService.Load(username, user)
+}
+
+// Save counts the call, then returns saveErr when it is set or delegates otherwise.
+func (s *spyUserService) Save(user User, comment string) error {
+
+	s.saves++
+
+	if s.saveErr != nil {
+		return s.saveErr
+	}
+
+	return s.UserService.Save(user, comment)
+}
+
+// newAccountsSteranko returns a Steranko whose users are the given accounts (username to
+// hashed password), along with the spy that records every Load and Save made against them.
+func newAccountsSteranko(accounts map[string]string, hashers ...PasswordHasher) (*Steranko, *spyUserService) {
+	spy := &spyUserService{UserService: memoryUserService{hashes: accounts}}
+	return New(spy, getTestKeyService(), WithPasswordHasher(hashers...)), spy
 }
 
 // staticFactory is a Factory that always returns the same Steranko instance

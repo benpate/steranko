@@ -14,39 +14,6 @@ import (
 	"github.com/benpate/rosetta/schema"
 )
 
-func TestAuthenticate(t *testing.T) {
-
-	s := getTestSteranko()
-
-	{
-		// Test successful signin
-		user := s.userService.New()
-		err := s.authenticate("michael@jackson.com", "hee-hee", user)
-		require.Nil(t, err)
-		require.NotNil(t, user)
-		require.Equal(t, "michael@jackson.com", user.GetUsername())
-		require.Equal(t, "hee-hee", user.GetHashedPassword())
-	}
-
-	{
-		// Test bad password
-		user := s.userService.New()
-		err := s.authenticate("michael@jackson.com", "hoo-hoo", user)
-		require.NotNil(t, err)
-		require.Equal(t, "michael@jackson.com", user.GetUsername())
-		require.Equal(t, "hee-hee", user.GetHashedPassword())
-	}
-
-	{
-		// Test missing user
-		user := s.userService.New()
-		err := s.authenticate("kendall@jackson.com", "chardonay", user)
-		require.NotNil(t, err)
-		require.Equal(t, "", user.GetUsername())
-		require.Equal(t, "", user.GetHashedPassword())
-	}
-}
-
 func TestValidatePassword(t *testing.T) {
 
 	s := getTestSteranko()

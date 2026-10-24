@@ -17,6 +17,7 @@ func (p Plaintext) HashPassword(password string) (string, error) {
 
 // CompareHashedPassword checks that a ciphertext value matches the plaintext password.
 func (p Plaintext) CompareHashedPassword(ciphertext string, plaintext string) (OK bool, rehash bool) {
+
 	// Constant-time comparison avoids leaking how many leading characters match.
 	match := subtle.ConstantTimeCompare([]byte(ciphertext), []byte(plaintext)) == 1
 

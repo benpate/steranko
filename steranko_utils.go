@@ -18,6 +18,12 @@ func (s *Steranko) SetPassword(user User, plaintext string) error {
 // each of the configured password hashers.  See PasswordService.ComparePassword
 // for the full contract.
 func (s *Steranko) ComparePassword(plaintext string, hashedValue string) (bool, bool) {
+
+	// RULE: Disallow empty passwords
+	if plaintext == "" {
+		return false, false
+	}
+
 	return s.passwords.ComparePassword(plaintext, hashedValue)
 }
 
@@ -35,6 +41,11 @@ func (s *Steranko) Passwords() PasswordService {
 func (s *Steranko) authenticate(username string, password string, user User) error {
 
 	const location = "steranko.authenticate"
+
+	// Do not allow empty password. This prevents unset passwords from granting access
+	if password == "" {
+		return derp.Unauthorized(location, "Password is required")
+	}
 
 	// Try to load the User from the UserService
 	if err := s.userService.Load(username, user); err != nil {
