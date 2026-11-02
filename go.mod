@@ -10,7 +10,7 @@ require (
 	github.com/benpate/remote v0.26.0
 	github.com/benpate/rosetta v0.46.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
-	github.com/labstack/echo/v4 v4.16.2
+	github.com/labstack/echo/v4 v4.16.3
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/crypto v0.58.0
 )
