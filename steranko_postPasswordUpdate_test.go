@@ -83,7 +83,7 @@ func TestPostPasswordUpdate_EmptyOldPassword(t *testing.T) {
 	err := s.PostPasswordUpdate(c)
 
 	require.Error(t, err)
-	require.True(t, derp.IsBadRequest(err), "got code %d", derp.ErrorCode(err))
+	require.True(t, derp.IsUnauthorized(err), "got code %d", derp.ErrorCode(err))
 
 	// RULE: The account still has no password, rather than one the requester chose
 	user := s.userService.New()

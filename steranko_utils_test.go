@@ -212,9 +212,9 @@ func TestAuthenticate_EmptyPassword(t *testing.T) {
 
 			err := s.authenticate(username, "", user)
 
-			// The guard answers with its own BadRequest
+			// The guard answers Unauthorized, as a wrong password does, with a message of its own
 			require.Error(t, err)
-			assert.True(t, derp.IsBadRequest(err), "got code %d", derp.ErrorCode(err))
+			assert.True(t, derp.IsUnauthorized(err), "got code %d", derp.ErrorCode(err))
 			assert.Equal(t, "steranko.authenticate", derp.Location(err))
 			assert.Equal(t, "Password is required", derp.Message(err))
 
@@ -260,7 +260,8 @@ func TestAuthenticate_EmptyPasswordAgainstBlankHash(t *testing.T) {
 			err := s.authenticate("blank@example.com", "", s.userService.New())
 
 			require.Error(t, err)
-			assert.True(t, derp.IsBadRequest(err), "got code %d", derp.ErrorCode(err))
+			assert.True(t, derp.IsUnauthorized(err), "got code %d", derp.ErrorCode(err))
+			assert.Equal(t, "Password is required", derp.Message(err))
 			assert.Zero(t, spy.loads, "the account must not be loaded")
 			assert.Zero(t, spy.saves, "a refused signin must not upgrade the stored hash")
 			assert.Equal(t, storedHash, accounts["blank@example.com"], "the stored hash must not change")

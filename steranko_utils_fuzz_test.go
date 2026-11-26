@@ -40,7 +40,8 @@ func FuzzAuthenticate(f *testing.F) {
 
 		// RULE: An empty password is refused before the user store is consulted
 		if password == "" {
-			require.True(t, derp.IsBadRequest(err), "empty password: got code %d", derp.ErrorCode(err))
+			require.True(t, derp.IsUnauthorized(err), "empty password: got code %d", derp.ErrorCode(err))
+			require.Equal(t, "Password is required", derp.Message(err))
 			require.Zero(t, spy.loads, "empty password must not load the account")
 			require.Zero(t, spy.saves, "empty password must not save the account")
 			require.Empty(t, user.GetUsername(), "empty password must not populate the User")
@@ -48,7 +49,7 @@ func FuzzAuthenticate(f *testing.F) {
 		}
 
 		// A non-empty password is judged by the store and the hashers, never by the guard
-		require.False(t, derp.IsBadRequest(err), "non-empty password %q tripped the guard", password)
+		require.NotEqual(t, "Password is required", derp.Message(err), "non-empty password %q tripped the guard", password)
 		require.Equal(t, 1, spy.loads, "a non-empty password loads the account exactly once")
 
 		// Admit exactly when the account exists and stores this password
