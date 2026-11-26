@@ -253,9 +253,13 @@ func TestAuthenticate_EmptyPasswordAgainstBlankHash(t *testing.T) {
 			accounts := map[string]string{"blank@example.com": storedHash}
 			s, spy := newAccountsSteranko(accounts, hashers...)
 
-			// Without the guard, this chain would sign the account in
-			ok, _ := s.ComparePassword("", storedHash)
+			// Without the guards, this chain would sign the account in
+			ok, _ := s.Passwords().ComparePassword("", storedHash)
 			require.True(t, ok, "precondition: the hasher chain must match an empty password")
+
+			// RULE: Steranko's own comparison refuses an empty password too
+			ok, _ = s.ComparePassword("", storedHash)
+			require.False(t, ok, "ComparePassword must refuse an empty password")
 
 			err := s.authenticate("blank@example.com", "", s.userService.New())
 
